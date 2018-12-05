@@ -9,9 +9,9 @@
 9998	modules/MO_module.f90	/^	 9998 FORMAT( 11(:,1X,'(',F6.2,',',F6.2,')') )$/;"	l	subroutine:PRINT_MATRIX	file:
 9998	modules/MO_module.f90	/^	 9998 FORMAT( 11(:,1X,F6.2) )$/;"	l	subroutine:PRINT_RMATRIX	file:
 A	BCSmodel.f90	/^		A(/;"	v	program:main
-B	BCSmodel.f90	/^		A(2*N_tot,2*N_tot),B(/;"	v	program:main
+B	BCSmodel.f90	/^		A(N_tot,N_tot),B(/;"	v	program:main
 BCS	BCSmodel.f90	/^module BCS$/;"	m
-C	BCSmodel.f90	/^		A(2*N_tot,2*N_tot),B(2*N_tot,2*N_tot),C(/;"	v	program:main
+C	BCSmodel.f90	/^		A(N_tot,N_tot),B(N_tot,N_tot),C(/;"	v	program:main
 E	modules/MO_module.f90	/^		real :: E$/;"	k	type:Nucleon
 EV_N	BCSmodel.f90	/^	REAL(8), dimension(:,:), allocatable :: EV_N,/;"	v	program:main
 EV_Z	BCSmodel.f90	/^	REAL(8), dimension(:,:), allocatable :: EV_N,EV_Z$/;"	v	program:main
@@ -19,7 +19,7 @@ Exch	modules/pfaffianAFP_DEF.f90	/^Subroutine Exch(/;"	s
 FC	makefile	/^FC= ifort$/;"	m
 FLAGS	makefile	/^FLAGS= -g -check all -fp-stack-check -heap-arrays $/;"	m
 Ipiv	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(/;"	v	program:main
-Ipiv3	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(4*N_tot,2),Ipiv3(/;"	v	program:main
+Ipiv3	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(2*N_tot,2),Ipiv3(/;"	v	program:main
 LIBS	makefile	/^LIBS= -mkl -Wl,-rpath,$(MKLPATH) -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -liomp5 -I$(MOD_DIR) $/;"	m
 MAIN	makefile	/^MAIN= BCSmodel.f90$/;"	m
 MKLINCLUDE	makefile	/^MKLINCLUDE=\/opt\/intel\/compilers_and_libraries_2019.1.144\/mac\/mkl\/include$/;"	m
@@ -36,18 +36,18 @@ OBJECTS_SRCS	makefile	/^OBJECTS_SRCS:=$(wildcard $(OBJ_DIR)\/*.f90)$/;"	m
 OBJ_DIR	makefile	/^OBJ_DIR=$(MOD_DIR)$/;"	m
 PRINT_MATRIX	modules/MO_module.f90	/^	subroutine PRINT_MATRIX(/;"	s	module:MO_module
 PRINT_RMATRIX	modules/MO_module.f90	/^	subroutine PRINT_RMATRIX(/;"	s	module:MO_module
-Pf	BCSmodel.f90	/^	COMPLEX(8) ::  U(2*N_tot,2*N_tot) , V(2*N_tot,2*N_tot) , SK(4*N_tot,4*N_tot), Pf,/;"	v	program:main
+Pf	BCSmodel.f90	/^	COMPLEX(8) ::  U(N_tot,N_tot) , V(N_tot,N_tot) , SK(2*N_tot,2*N_tot), Pf,/;"	v	program:main
 Pf3	BCSmodel.f90	/^		SK3(4,4),Pf3,/;"	v	program:main
 PfaffianF	modules/pfaffianAFP_DEF.f90	/^Subroutine PfaffianF(/;"	s
-SK	BCSmodel.f90	/^	COMPLEX(8) ::  U(2*N_tot,2*N_tot) , V(2*N_tot,2*N_tot) , SK(/;"	v	program:main
-SK2	BCSmodel.f90	/^		A(2*N_tot,2*N_tot),B(2*N_tot,2*N_tot),C(2*N_tot,2*N_tot), SK2(/;"	v	program:main
+SK	BCSmodel.f90	/^	COMPLEX(8) ::  U(N_tot,N_tot) , V(N_tot,N_tot) , SK(/;"	v	program:main
+SK2	BCSmodel.f90	/^		A(N_tot,N_tot),B(N_tot,N_tot),C(N_tot,N_tot), SK2(/;"	v	program:main
 SK3	BCSmodel.f90	/^		SK3(/;"	v	program:main
-SKD	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(4*N_tot,2),Ipiv3(4,2),SKD(/;"	v	program:main
+SKD	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(2*N_tot,2),Ipiv3(4,2),SKD(/;"	v	program:main
 Theta_N	BCSmodel.f90	/^	REAL(8) :: V_N_tot(N_tot,7), Theta_N(/;"	v	program:main
 U	BCSmodel.f90	/^	COMPLEX(8) ::  U(/;"	v	program:main
-V	BCSmodel.f90	/^	COMPLEX(8) ::  U(2*N_tot,2*N_tot) , V(/;"	v	program:main
+V	BCSmodel.f90	/^	COMPLEX(8) ::  U(N_tot,N_tot) , V(/;"	v	program:main
 V_N_tot	BCSmodel.f90	/^	REAL(8) :: V_N_tot(/;"	v	program:main
-W	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(4*N_tot,2),Ipiv3(4,2),SKD(4*N_tot,4*N_tot),W(/;"	v	program:main
+W	BCSmodel.f90	/^		SK3(4,4),Pf3,Ipiv(2*N_tot,2),Ipiv3(4,2),SKD(2*N_tot,2*N_tot),W(/;"	v	program:main
 Z	BCSmodel.f90	/^	integer :: N,Z,/;"	v	program:main
 ZExch	modules/pfaffianAFP_DEF.f90	/^Subroutine ZExch(/;"	s
 ZPfaffianF	modules/pfaffianAFP_DEF.f90	/^Subroutine ZPfaffianF(/;"	s
