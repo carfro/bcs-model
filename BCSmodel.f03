@@ -14,9 +14,12 @@ program main
 
 ! 	Variables used for analytic solution
 	REAL(8), dimension(:,:), allocatable :: EV_N,EV_Z
-	REAL(8) :: V_N_tot(N_tot,7), theta_N(N_tot,7), U(N_tot,N_tot) , V(N_tot,N_tot)
+	COMPLEX(8) ::  U(N_tot,N_tot) , V(N_tot,N_tot) , SK(2*N_tot,2*N_tot)
+	REAL(8) :: V_N_tot(N_tot,7), theta_N(N_tot,7) , Pf
 	REAL(8) :: lam_sN,lam_sZ,tol
 	REAL(8) :: factor(7)
+	Integer,dimension(N_tot,2)::Ipiv
+
 
 	! Nbr of neutrons/protons and loop integer(s),
 	integer :: i,j
@@ -33,13 +36,6 @@ program main
 
 	call nucleus_creator(N,Z,nucleus)
 
-	!call print_n(nucleus)
-	!call analytic_solve_sweep(nucleus,N,Z,step,tol,EV_N,lam_sN,EV_Z,lam_sZ)
-	!write(*,*) lam_sN, sum(EV_N(:,2),1), nucleus(N,1)%E
-	!write(*,*) lam_sZ, sum(EV_Z(:,2),1), nucleus(Z,2)%E
-
-	open(unit=1,file='data/ev_neutrons.dat')
-	open(unit=2,file='data/eu_neutrons.dat')
 	factor = (/0.5d0,0.75d0,1.d0,1.25d0,1.5d0,1.75d0,2d0/)
 
 	do i=1,7
@@ -47,18 +43,17 @@ program main
 		V_N_tot(:,i) = EV_N(:,2)
 	end do
 
-	do i=1,N_tot
-		Theta_N(i,:)=(/  (0.5*dacos(-1.d0+2*V_N_tot(i,j)), j=1,7) /)
-		write(1,'(15F20.10)') nucleus(i,1)%E , ( V_N_tot(i,j) , j=1,7)
-		write(2,'(15F20.10)') nucleus(i,1)%E , ( dsin(theta_N(i,j))**2 , j=1,7)
-	end do
-
 	U=0;V=0;
 	do i=1,N_tot
-		U(i,i)=dsin(theta_N(i,3))
-		V(i,i)=dcos(theta_N(i,3))
+		U(i,i)=cmplx(dsin(theta_N(i,3)),0,8)
+		V(i,i)=cmplx(dcos(theta_N(i,3)),0,8)
 	end do
 
-	write(*,*) shape(U), shape(V)
+	SK=reshape((/ matmul(transpose(V),U),-matmul(transpose(V),V),&
+		matmul(transpose(V),V),matmul(transpose(U),V)/), shape(SK))
+
+	call ZPfaffianF(SK,2*N_tot,2*N_tot,Ipiv,Pf)
+
+	write(*,*) Pf
 	deallocate(nucleus,EV_N)
 end program main
