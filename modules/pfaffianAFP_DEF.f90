@@ -4,7 +4,7 @@
 !|   Full pivoting is implemented to make the whole procedure stable   |
 !+---------------------------------------------------------------------+
 !|   Only the upper triangle of SK is used                             |
-!|   In output the lower triangle contains the transformation matrix   | 
+!|   In output the lower triangle contains the transformation matrix   |
 !+---------------------------------------------------------------------+
 !|   SK .....Skew symmetric input matrix                               |
 !|   LDS ....Leading dimension of matrix SK                            |
@@ -35,16 +35,16 @@ epsln = 1.0d-13   ! smallest number such that 1+epsln=1
 
 if(mod(N,2)==1) then ! N odd
 
-Pf = 0.0d+00 
+Pf = 0.0d+00
 
 else
-   
+
 NB= N / 2   ! Number of 2x2 blocks
-       
-if (NB==1) then 
+
+if (NB==1) then
 
 ! The pfaffian of a 2x2 matrix is Pf=Sk(1,2)
-       
+
 Pf = SK(1,2)
 
 else   ! NB>1
@@ -52,7 +52,7 @@ else   ! NB>1
 Pf = 1.0d+00
 
 do IB=1,NB-1
-   
+
    NR = IB*2 - 1 ! row numb of the 1,2 element of the 2x2 block
    NC = NR + 1
 
@@ -60,34 +60,34 @@ do IB=1,NB-1
 
    I1 = NR
    I2 = NC
-             
+
    do i=NR,N-1 ! all rows
       do j=i+1,N
-   
+
          if(dabs(SK( i , j )) > big) then
             big = dabs(SK( i , j ))
             I1 = i
-            I2 = j 
+            I2 = j
          end if
-         
+
       end do
    end do
-   
+
    Ipiv( IB , 1) = I1 ! to initialize
    Ipiv( IB , 2) = I2 ! to initialize
 
    phas = 1.0d+00
    if(I1==NR) phas = -phas
-   if(I2==NC) phas = -phas 
-          
+   if(I2==NC) phas = -phas
+
 ! Pivoting of element NR,NC with ip1,ip2
 
-! 
+!
 !   Pivoting for a skew-symmetric matrix (Upper)
 !
    if(I1/=NR) Call exch(SK,LDS,N,NR,I1)
    if(I2/=NC) Call exch(SK,LDS,N,NC,I2)
-   
+
    ss = Sk( NR , NC )
 
 
@@ -99,7 +99,7 @@ do IB=1,NB-1
 !
 
    do i = 2*IB+1 , N-1
-   
+
       do j = i+1 , N
 
          Sk(i,j) = Sk(i,j) + (Sk(NC,i)*Sk(NR,j)-Sk(NR,i)*Sk(NC,j))/SS
@@ -108,49 +108,49 @@ do IB=1,NB-1
    end do
 !
 ! Storing X and Y vectors in the lower part of the matrix
-!       
+!
    do i = 2*IB+1 , N
-   
+
       Sk( i , NR ) =  -Sk( NC , i )/SS
       Sk( i , NC ) =   Sk( NR , i )/SS
-      
+
    end do
-    
+
    if (IB>=2) then  ! swap
 
 !
 !   Swapping
-!       
+!
    do j= 1 , 2*IB
-   
+
       SW           = Sk( NR , j )
-      Sk( NR , j ) = Sk( I1 , j ) 
+      Sk( NR , j ) = Sk( I1 , j )
       Sk( I1 , j ) = SW
-   
+
       SW           = Sk( NC , j )
-      Sk( NC , j ) = Sk( I2 , j ) 
+      Sk( NC , j ) = Sk( I2 , j )
       Sk( I2 , j ) = SW
 
-   end do       
-   
+   end do
+
    end if
-                  
+
    else
-   
+
    Pf = 0.0d+00
-   
+
    return
-   
+
    end if ! dabs(ss) > epsln
-   
+
    Pf = Pf * SS * phas
-   
+
    end do ! IB
-   
+
 Pf = Pf * Sk(N-1,N)
 
 end if !    NB == 1
-   
+
 end if !    mod(N,2) == 1
 
 return
@@ -169,11 +169,11 @@ Integer, intent(in):: N,LDS,I1,I2
 Real*8,intent(inout),dimension(LDS,N):: SK
 Real*8 :: SS
 
-       
+
 SK(i1,i2) = -SK(i1,i2)
-                       
+
 if(I1/=1) then
-   
+
    do i=1,I1-1
       SS           = SK( i , I1 )
       SK( i , I1 ) = SK( i , I2 )
@@ -182,7 +182,7 @@ if(I1/=1) then
 end if
 
 if(I2/=N) then
-   
+
    do i=I2+1,N
       SS           = SK( I1 , i )
       SK( I1 , i ) = SK( I2 , i )
@@ -191,7 +191,7 @@ if(I2/=N) then
 end if
 
 if(I2>=I1+2) then
-   
+
    do i=I1+1,I2-1
       SS           =  SK( I1 , i )
       SK( I1 , i ) = -SK( i , I2 )
@@ -227,13 +227,13 @@ if(mod(N,2) == 1) then ! N odd
 Pf = zero
 
 else
-   
+
 NB= N / 2   ! Number of 2x2 blocks
-       
-if (NB==1) then 
+
+if (NB==1) then
 
 ! The pfaffian of a 2x2 matrix is Pf=Sk(1,2)
-       
+
 Pf = SK(1,2)
 
 else   ! NB>1
@@ -241,7 +241,7 @@ else   ! NB>1
 Pf = one
 
 do IB=1,NB-1
-   
+
    NR = IB*2 - 1 ! row numb of the 1,2 element of the 2x2 block
    NC = NR + 1
 
@@ -249,36 +249,36 @@ do IB=1,NB-1
 
    I1 = NR
    I2 = NC
-             
+
    do i=NR,N-1 ! all rows
       do j=i+1,N
-   
+
          if(abs(SK( i , j ))> big) then
             big = abs(SK( i , j ))
             I1 = i
-            I2 = j 
+            I2 = j
          end if
-         
+
       end do
    end do
-   
+
    Ipiv( IB , 1) = I1 ! to initialize
    Ipiv( IB , 2) = I2 ! to initialize
 
    phas = 1.0d+00
    if(I1==NR) phas = -phas
-   if(I2==NC) phas = -phas 
-   
+   if(I2==NC) phas = -phas
+
 ! Pivoting of element NR,NC with ip1,ip2
 
-! 
+!
 !   Pivoting for a skew-symmetric matrix (Upper)
 !
    if(I1/=NR) Call Zexch(SK,LDS,N,NR,I1)
    if(I2/=NC) Call Zexch(SK,LDS,N,NC,I2)
-   
+
    ss = Sk( NR , NC )
-  
+
 !       write(6,*) ' IB I2, I2 ', IB,I1,I2,big,ss
 
    if(abs(ss)>epsln) then
@@ -287,7 +287,7 @@ do IB=1,NB-1
 !
 
    do i = 2*IB+1 , N-1
-   
+
       do j = i+1 , N
 
          Sk(i,j) = Sk(i,j) + (Sk(NC,i)*Sk(NR,j)-Sk(NR,i)*Sk(NC,j))/SS
@@ -295,51 +295,51 @@ do IB=1,NB-1
    end do
 !
 ! Storing X and Y vectors in the lower part of the matrix
-!       
+!
    do i = 2*IB+1 , N
-   
+
       Sk( i , NR ) =  -Sk( NC , i )/SS
       Sk( i , NC ) =   Sk( NR , i )/SS
-      
+
    end do
-    
+
    if (IB>=2) then  ! swap
 
 !
 !   Swapping
-!       
+!
    do j= 1 , 2*IB
-   
+
       SW           = Sk( NR , j )
-      Sk( NR , j ) = Sk( I1 , j ) 
+      Sk( NR , j ) = Sk( I1 , j )
       Sk( I1 , j ) = SW
-   
+
       SW           = Sk( NC , j )
-      Sk( NC , j ) = Sk( I2 , j ) 
+      Sk( NC , j ) = Sk( I2 , j )
       Sk( I2 , j ) = SW
 
-   end do       
-   
+   end do
+
    end if
-                  
+
    else
-   
+
    Pf = zero
-   
+
    return
-   
+
    end if ! dabs(ss)>epsln
-   
+
    Pf = Pf * SS * phas
-   
+
    end do ! IB
-   
+
 Pf = Pf * Sk(N-1,N)
-   
+
 end if !    NB==1
-      
+
 end if !    mod(N,2)==1
-   
+
 return
 end
 !
@@ -354,11 +354,11 @@ Integer,intent(in)::LDS,N,I1,I2
 Integer :: I
 Double Complex,intent(inout),dimension(LDS,N):: SK
 Double Complex :: SS
-       
+
 SK(i1,i2) = -SK(i1,i2)
-                       
+
 if(I1/=1) then
-   
+
    do i=1,I1-1
       SS           = SK( i , I1 )
       SK( i , I1 ) = SK( i , I2 )
@@ -367,7 +367,7 @@ if(I1/=1) then
 end if
 
 if(I2/=N) then
-   
+
    do i=I2+1,N
       SS           = SK( I1 , i )
       SK( I1 , i ) = SK( I2 , i )
@@ -376,7 +376,7 @@ if(I2/=N) then
 end if
 
 if(I2>=I1+2) then
-   
+
    do i=I1+1,I2-1
       SS           =  SK( I1 , i )
       SK( I1 , i ) = -SK( i , I2 )
@@ -386,4 +386,3 @@ end if
 
 return
 end
-       

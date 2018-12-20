@@ -1,32 +1,8 @@
 module BCS
 	use MO_module
 	use analytic_module
+	use pfaffian_module
 	implicit none
-	integer, parameter :: qp = selected_real_kind(33, 4931) ! 128-bit real w/ 33 sig. fig, exponent range 4931 
-contains
-	FUNCTION overlap_pfaffian(lambda,NDIM,dimD,dimM,UD,UM,VD,VM) result(pf)
-	    ! computes the overlap of two wave functions with pfaffian formula
-
-	    implicit none
-
-
-	    integer, intent(in) :: NDIM, dimD, dimM
-	    complex*16 :: W((dimM+dimD),(dimM+dimD))
-	    complex*16, intent(in) :: UD(NDIM,dimD), VD(NDIM,dimD), UM(NDIM,dimM), VM(NDIM,dimM)
-	    integer :: IPIV((dimM+dimD),2)
-	    complex(kind=qp) :: pf
-	    real(kind=qp),intent(in) :: lambda
-
-	    W(1:dimM,1:dimM) = matmul(transpose(VM),UM)
-	    W(1:dimM,(dimM+1):(dimM+dimD)) = matmul(transpose(VM),conjg(VD))
-	    W((dimM+1):(dimM+dimD),1:dimM) = -matmul(transpose(conjg(VD)),VM)
-	    W((dimM+1):(dimM+dimD),(dimM+1):(dimM+dimD)) = matmul(transpose(conjg(UD)),conjg(VD))
-
-	    W=lambda*W
-
-	    call Zpfaffian_ext(W,(dimM+dimD),(dimM+dimD),IPIV,pf)
-	    return
-	END FUNCTION overlap_pfaffian
 end module BCS
 
 ! Constructs the BCS-model and computes the system for \lambda=[1..-1] and plots the result versus number of particles

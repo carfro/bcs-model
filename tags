@@ -52,7 +52,13 @@ WW22	BCSmodel.f90	/^		WWD(2*N_tot,2*N_tot),WW2(2*24,2*24),Pf2,WW22(/;"	v	program
 WWD	BCSmodel.f90	/^		WWD(/;"	v	program:main
 Z	BCSmodel.f90	/^	integer :: N,Z,/;"	v	program:main
 ZExch	modules/pfaffianAFP_DEF.f90	/^Subroutine ZExch(/;"	s
+ZExch	modules/pfaffian_module.f90	/^	Subroutine ZExch(/;"	s	module:pfaffian_module
+ZExch_ext	modules/pfaffian_extended.f90	/^Subroutine ZExch_ext(/;"	s
+ZExch_ext	modules/pfaffian_module.f90	/^	Subroutine ZExch_ext(/;"	s	module:pfaffian_module
 ZPfaffianF	modules/pfaffianAFP_DEF.f90	/^Subroutine ZPfaffianF(/;"	s
+ZPfaffianF	modules/pfaffian_module.f90	/^	Subroutine ZPfaffianF(/;"	s	module:pfaffian_module
+ZPfaffian_EXT	modules/pfaffian_extended.f90	/^Subroutine ZPfaffian_EXT(/;"	s
+ZPfaffian_EXT	modules/pfaffian_module.f90	/^	Subroutine ZPfaffian_EXT(/;"	s	module:pfaffian_module
 analytic_EV	modules/analytic_module.f90	/^	function analytic_EV(/;"	f	module:analytic_module
 analytic_module	modules/analytic_module.f90	/^module analytic_module$/;"	m
 analytic_solve_sweep	modules/analytic_module.f90	/^	subroutine analytic_solve_sweep(/;"	s	module:analytic_module
@@ -74,14 +80,15 @@ nucleus	BCSmodel.f90	/^	type(Nucleon), dimension(:,:), allocatable :: nucleus$/;
 nucleus_creator	modules/MO_module.f90	/^	subroutine nucleus_creator(/;"	s	module:MO_module
 nucleus_extractor	modules/MO_module.f90	/^	function nucleus_extractor(/;"	f	module:MO_module
 ome	modules/MO_module.f90	/^		integer :: ome$/;"	k	type:Nucleon
-overlap_pfaffian	BCSmodel.f90	/^	FUNCTION overlap_pfaffian(/;"	f	module:BCS
+overlap_pfaffian	modules/pfaffian_module.f90	/^	FUNCTION overlap_pfaffian(/;"	f	module:pfaffian_module
+pfaffian_module	modules/pfaffian_module.f90	/^module pfaffian_module /;"	m
 print_n	modules/MO_module.f90	/^	subroutine print_n(/;"	s	module:MO_module
 print_nucleus	modules/MO_module.f90	/^	subroutine print_nucleus(/;"	s	module:MO_module
 prod	BCSmodel.f90	/^	real(kind=qp) 	:: prod,/;"	v	program:main
 prod2	BCSmodel.f90	/^		 	prod2$/;"	v	program:main
 q	modules/MO_module.f90	/^		integer :: q$/;"	k	type:Nucleon
 qntm_nbrs	modules/MO_module.f90	/^	subroutine qntm_nbrs(/;"	s	module:MO_module
-qp	BCSmodel.f90	/^	integer, parameter :: qp /;"	v	module:BCS
+qp	modules/pfaffian_module.f90	/^	integer, parameter 	:: qp /;"	v	module:pfaffian_module
 quicksort_energy	modules/MO_module.f90	/^	recursive subroutine quicksort_energy(/;"	s	module:MO_module
 quicksort_ome	modules/MO_module.f90	/^	recursive subroutine quicksort_ome(/;"	s	module:MO_module
 s	modules/MO_module.f90	/^		integer :: s$/;"	k	type:Nucleon

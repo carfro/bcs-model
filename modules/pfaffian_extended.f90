@@ -19,7 +19,7 @@
 !     W=lambda*W
 !
 !     call Zpfaffian_ext(W,(dimM+dimD),(dimM+dimD),IPIV,overlap_pfaffian)
-!     return
+!     return§
 ! END FUNCTION overlap_pfaffian
 
 ! FUNCTION overlap_pfaffian(lambda,NDIM,dimD,dimM,UD,UM,VD,VM,DMAT)
