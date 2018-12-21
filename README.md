@@ -7,4 +7,6 @@ The thesis project objective is to write a program/code that takes HFB-states as
 This specific repo is the beginning of this project and so far contains MO + BCS states together with overlapp pfaffian calculations.
 
 ## How to run
+Run the project using '$make', to clean the dir use '$make clean'.
 The makefile is, in it's current state, set to work for os x 10.14.1. 
+
