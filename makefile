@@ -1,22 +1,19 @@
 #------------------------------------------------------------------
 #| Makefile to create the BCS-model executable			  | 
 #------------------------------------------------------------------
-#| Requires the Linear algebra libraries    Lapack and Blas       |
-#|                                                                |
+#| Uses intels MKL lib (uses lapack and blas)			  | 
 #------------------------------------------------------------------
-#
-# ----------------------------------------------------------------------
+#-----------------------------------------------------------------------
 #              Default:   Intel Fortran  compiler 
 #              		LINUX
 # ----------------------------------------------------------------------
-FOR=ifort
-FLAGS= -g -check all -fp-stack-check -heap-arrays 
+FC=ifort
+FLAGS= -g -check all -fp-stack-check -heap-arrays $(IFLAGS)
 #         Intel's math kernel library, for LINUX
-LIBS= -L/opt/intel/Compiler/11.0/069/mkl/lib/em64t/ -lmkl_lapack -lmkl_core -lmkl_em64t -lmkl_intel_thread -lmkl_intel_lp64 -liomp5
-# 
+LIBS= -L/opt/intel/Compiler/11.0/069/mkl/lib/em64t/ 
 # ----------------------------------------------------------------------
 #              Default:   Intel Fortran  compiler 
-#              		MACITOSH	
+#              		MACINTOSH	
 # ----------------------------------------------------------------------
 #FOR=ifort
 #FLAGS= -g -check all -fp-stack-check -heap-arrays 
@@ -27,7 +24,7 @@ LIBS= -L/opt/intel/Compiler/11.0/069/mkl/lib/em64t/ -lmkl_lapack -lmkl_core -lmk
 #            Object files and Modules                                   
 # ----------------------------------------------------------------------
 MOD_DIR=modules
-MODS=-I$(MOD_DIR)
+IFLAGS=-module $(MOD_DIR) lib/libpfapack.a -Ilib
 #  
 OBJ_DIR=$(MOD_DIR)
 OBJECTS_SRCS:=$(wildcard $(OBJ_DIR)/*.f90)
@@ -39,9 +36,9 @@ MAIN= BCSmodel.f90
 # ----------------------------------------------------------------------
 # "make" will build all
 all: $(OBJECTS) $(MAIN)
-	$(FC) $(FLAGS) $(MODS) -o BCS $(OBJECTS) $(MAIN)
+	$(FC) $(FLAGS) -o BCS $(OBJECTS) $(MAIN)
 %.o: %.f90	
-	$(FC) $(FLAGS) $(LIBS) $(MODS) -c $<  -o $@
+	$(FC) $(FLAGS) $(LIBS) -c $<  -o $@
 # Utility targets
 clean: 
 	rm -f $(OBJ_DIR)/*.o $(MOD_DIR)/*.mod *.o *.mod BCS
