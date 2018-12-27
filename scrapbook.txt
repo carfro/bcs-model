@@ -129,6 +129,7 @@
 	close(unit=5)
 	close(unit=6)
 	deallocate(nucleus,EV_N)
+<<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
 
 
 
@@ -301,3 +302,5 @@ clean:
 
 
 	write(*,*) summ
+=======
+>>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
