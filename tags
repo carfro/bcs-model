@@ -8,48 +8,42 @@
 100	modules/MO_module.f90	/^		100 format (a,i3,a9,i3,i9,i5,i5,a2,i5,a2,i5,a2,f14.2)$/;"	l	subroutine:print_nucleus	file:
 9998	modules/MO_module.f90	/^	 9998 FORMAT( 11(:,1X,'(',F6.2,',',F6.2,')') )$/;"	l	subroutine:PRINT_MATRIX	file:
 9998	modules/MO_module.f90	/^	 9998 FORMAT( 11(:,1X,F6.2) )$/;"	l	subroutine:PRINT_RMATRIX	file:
-A	BCSmodel.f90	/^		A(/;"	v	program:main
-B	BCSmodel.f90	/^		A(N_tot,N_tot),B(/;"	v	program:main
 BCS	BCSmodel.f90	/^module BCS$/;"	m
-C	BCSmodel.f90	/^		A(N_tot,N_tot),B(N_tot,N_tot),C(/;"	v	program:main
 E	modules/MO_module.f90	/^		real :: E$/;"	k	type:Nucleon
-EV_N	BCSmodel.f90	/^	REAL(8), dimension(:,:), allocatable :: EV_N,/;"	v	program:main
-EV_Z	BCSmodel.f90	/^	REAL(8), dimension(:,:), allocatable :: EV_N,EV_Z$/;"	v	program:main
 Exch	modules/pfaffianAFP_DEF.f90	/^Subroutine Exch(/;"	s
-FC	makefile	/^FC= ifort$/;"	m
-FLAGS	makefile	/^FLAGS= -g -check all -fp-stack-check -heap-arrays $/;"	m
+FC	makefile	/^FC=ifort$/;"	m
+FLAGS	makefile	/^FLAGS= -g -check all -fp-stack-check -heap-arrays $(IFLAGS)$/;"	m
+IFLAGS	makefile	/^IFLAGS=-I$(MOD_DIR) -I$(PFAPATH) $(PFAPATH)\/libpfapack.a$/;"	m
 Ipiv	BCSmodel.f90	/^	Integer 	:: Ipiv(/;"	v	program:main
 Ipiv2	BCSmodel.f90	/^	Integer 	:: Ipiv(2*N_tot,2),Ipiv2(/;"	v	program:main
 Ipiv22	BCSmodel.f90	/^	Integer 	:: Ipiv(2*N_tot,2),Ipiv2(2*24,2),Ipiv22(/;"	v	program:main
 Ipiv3	BCSmodel.f90	/^	Integer 	:: Ipiv(2*N_tot,2),Ipiv2(2*24,2),Ipiv22(2*24,2),Ipiv3(/;"	v	program:main
-LIBS	makefile	/^LIBS= -mkl -Wl,-rpath,$(MKLPATH) -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -liomp5 -I$(MOD_DIR) $/;"	m
+LIBS	makefile	/^LIBS= -mkl -Wl,-rpath,$(MKLPATH) -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -liomp5 $/;"	m
 MAIN	makefile	/^MAIN= BCSmodel.f90$/;"	m
-MKLINCLUDE	makefile	/^MKLINCLUDE=\/opt\/intel\/compilers_and_libraries_2019.1.144\/mac\/mkl\/include$/;"	m
-MKLPATH	makefile	/^MKLPATH=\/opt\/intel\/compilers_and_libraries_2019.1.144\/mac\/mkl\/lib$/;"	m
-MODS	makefile	/^MODS=-I$(MOD_DIR)$/;"	m
+MFLAG	makefile	/^MFLAG=-module $(MOD_DIR)$/;"	m
+MKLPATH	makefile	/^MKLPATH=\/opt\/intel\/compilers_and_libraries_2019.1.144\/mac\/mkl\/lib $/;"	m
 MOD_DIR	makefile	/^MOD_DIR=modules$/;"	m
 MO_module	modules/MO_module.f90	/^module MO_module /;"	m
 N	BCSmodel.f90	/^	integer :: N,/;"	v	program:main
 N	modules/MO_module.f90	/^		integer :: N$/;"	k	type:Nucleon
-N_tot	BCSmodel.f90	/^	integer, parameter :: N_tot=/;"	v	program:main
+N_tot	BCSmodel.f90	/^	integer, parameter :: N_tot=/;"	v	module:BCS
 Nucleon	modules/MO_module.f90	/^	type, public :: Nucleon$/;"	t	module:MO_module
 OBJECTS	makefile	/^OBJECTS:=$(OBJECTS_SRCS:%.f90=%.o)$/;"	m
 OBJECTS_SRCS	makefile	/^OBJECTS_SRCS:=$(wildcard $(OBJ_DIR)\/*.f90)$/;"	m
 OBJ_DIR	makefile	/^OBJ_DIR=$(MOD_DIR)$/;"	m
+PFAPATH	makefile	/^PFAPATH=\/Users\/carlfrostenson\/Documents\/1_UNI\/1_MasterThesis\/Fortran\/Routines\/Pfaffian\/pfapack\/fortran$/;"	m
 PRINT_MATRIX	modules/MO_module.f90	/^	subroutine PRINT_MATRIX(/;"	s	module:MO_module
 PRINT_RMATRIX	modules/MO_module.f90	/^	subroutine PRINT_RMATRIX(/;"	s	module:MO_module
 Pf	BCSmodel.f90	/^	complex(kind=qp) :: Pf2/;"	v	program:main
-Pf2	BCSmodel.f90	/^		WWD(2*N_tot,2*N_tot),WW2(2*24,2*24),Pf2,/;"	v	program:main
+Pf2	BCSmodel.f90	/^	COMPLEX(8) :: 	Pf2,/;"	v	program:main
 Pf22	BCSmodel.f90	/^	complex(kind=qp) :: Pf22,/;"	v	program:main
 PfaffianF	modules/pfaffianAFP_DEF.f90	/^Subroutine PfaffianF(/;"	s
-Theta_N	BCSmodel.f90	/^	REAL(8) :: 	V_N_tot(N_tot,7), Theta_N(/;"	v	program:main
-U	BCSmodel.f90	/^	COMPLEX(8) ::  U(/;"	v	program:main
-V	BCSmodel.f90	/^	COMPLEX(8) ::  U(N_tot,N_tot) , V(/;"	v	program:main
-V_N_tot	BCSmodel.f90	/^	REAL(8) :: 	V_N_tot(/;"	v	program:main
-WW	BCSmodel.f90	/^	COMPLEX(8) ::  U(N_tot,N_tot) , V(N_tot,N_tot) , WW(/;"	v	program:main
-WW2	BCSmodel.f90	/^		WWD(2*N_tot,2*N_tot),WW2(/;"	v	program:main
-WW22	BCSmodel.f90	/^		WWD(2*N_tot,2*N_tot),WW2(2*24,2*24),Pf2,WW22(/;"	v	program:main
-WWD	BCSmodel.f90	/^		WWD(/;"	v	program:main
+U_N	BCSmodel.f90	/^			U_N(/;"	v	program:main
+U_Z	BCSmodel.f90	/^			U_Z(/;"	v	program:main
+V_N	BCSmodel.f90	/^			U_N(N_tot,N_tot),V_N(/;"	v	program:main
+V_Z	BCSmodel.f90	/^			U_Z(N_tot,N_tot),V_Z(/;"	v	program:main
+WTW	BCSmodel.f90	/^	FUNCTION WTW(/;"	f	module:BCS
+WW_N	BCSmodel.f90	/^	COMPLEX(8) :: 	Pf2,WW_N(/;"	v	program:main
 Z	BCSmodel.f90	/^	integer :: N,Z,/;"	v	program:main
 ZExch	modules/pfaffianAFP_DEF.f90	/^Subroutine ZExch(/;"	s
 ZExch	modules/pfaffian_module.f90	/^	Subroutine ZExch(/;"	s	module:pfaffian_module
@@ -63,16 +57,11 @@ analytic_EV	modules/analytic_module.f90	/^	function analytic_EV(/;"	f	module:ana
 analytic_module	modules/analytic_module.f90	/^module analytic_module$/;"	m
 analytic_solve_sweep	modules/analytic_module.f90	/^	subroutine analytic_solve_sweep(/;"	s	module:analytic_module
 energy	modules/MO_module.f90	/^	subroutine energy(/;"	s	module:MO_module
-factor	BCSmodel.f90	/^	real(kind=qp) 	:: prod,factor,/;"	v	program:main
-factor2	BCSmodel.f90	/^	real(kind=qp) 	:: prod,factor,factor2$/;"	v	program:main
+factor	BCSmodel.f90	/^	real(kind=qp) 	:: factor$/;"	v	program:main
 hbar_omega	modules/MO_module.f90	/^	function hbar_omega(/;"	f	module:MO_module
 higher_energy	modules/analytic_module.f90	/^	function higher_energy(/;"	f	module:analytic_module
-i	BCSmodel.f90	/^	in/;"	v	program:main
-j	BCSmodel.f90	/^	integer :: i,j$/;"	v	program:main
 j	modules/MO_module.f90	/^		integer :: j$/;"	k	type:Nucleon
 l	modules/MO_module.f90	/^		integer :: l$/;"	k	type:Nucleon
-lam_sN	BCSmodel.f90	/^			lam_sN,/;"	v	program:main
-lam_sZ	BCSmodel.f90	/^			lam_sN,lam_sZ,/;"	v	program:main
 linspace	modules/analytic_module.f90	/^	function linspace(/;"	f	module:analytic_module
 lower_energy	modules/analytic_module.f90	/^	function lower_energy(/;"	f	module:analytic_module
 main	BCSmodel.f90	/^program main$/;"	p
@@ -84,15 +73,15 @@ overlap_pfaffian	modules/pfaffian_module.f90	/^	FUNCTION overlap_pfaffian(/;"	f	
 pfaffian_module	modules/pfaffian_module.f90	/^module pfaffian_module /;"	m
 print_n	modules/MO_module.f90	/^	subroutine print_n(/;"	s	module:MO_module
 print_nucleus	modules/MO_module.f90	/^	subroutine print_nucleus(/;"	s	module:MO_module
-prod	BCSmodel.f90	/^	real(kind=qp) 	:: prod,/;"	v	program:main
-prod2	BCSmodel.f90	/^		 	prod2$/;"	v	program:main
+prod_N	BCSmodel.f90	/^	complex(kind=qp) :: Pf22,Pf,prod_N,/;"	v	program:main
+prod_Z	BCSmodel.f90	/^	complex(kind=qp) :: Pf22,Pf,prod_N,prod_Z$/;"	v	program:main
 q	modules/MO_module.f90	/^		integer :: q$/;"	k	type:Nucleon
 qntm_nbrs	modules/MO_module.f90	/^	subroutine qntm_nbrs(/;"	s	module:MO_module
 qp	modules/pfaffian_module.f90	/^	integer, parameter 	:: qp /;"	v	module:pfaffian_module
+qpart_creator	BCSmodel.f90	/^	Subroutine qpart_creator(/;"	s	module:BCS
 quicksort_energy	modules/MO_module.f90	/^	recursive subroutine quicksort_energy(/;"	s	module:MO_module
 quicksort_ome	modules/MO_module.f90	/^	recursive subroutine quicksort_ome(/;"	s	module:MO_module
 s	modules/MO_module.f90	/^		integer :: s$/;"	k	type:Nucleon
-scaleFactor	BCSmodel.f90	/^			lam_sN,lam_sZ,tol,scaleFactor(/;"	v	program:main
+scaleFactor	BCSmodel.f90	/^	REAL(8) 	:: scaleFactor(/;"	v	program:main
 siz	BCSmodel.f90	/^	integer :: N,Z,siz,/;"	v	program:main
 step	BCSmodel.f90	/^	integer :: N,Z,siz,step$/;"	v	program:main
-tol	BCSmodel.f90	/^			lam_sN,lam_sZ,tol,/;"	v	program:main
