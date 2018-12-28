@@ -224,7 +224,7 @@ contains
 	END Subroutine qpart_creator
 
 	FUNCTION WTW(U,V) result(WW)
-		complex(8) 			:: WW(2*N_tot,2*N_tot),U(N_tot,N_tot),V(N_tot,N_tot)
+		complex(8) 	:: WW(2*N_tot,2*N_tot),U(N_tot,N_tot),V(N_tot,N_tot)
 
 		WW(1:N_tot,1:N_tot) = matmul(transpose(V),U)
 		WW(N_tot+1:2*N_tot,1:N_tot) = -matmul(transpose(V),V)
@@ -237,11 +237,12 @@ end module BCS
 ! Constructs the BCS-model and computes the system for \lambda=[1..-1] and plots the result versus number of particles
 program main
 	use BCS
-	use f95_pfapack
+	USE F95_PFAPACK
 	implicit none
 ! 	Nucleus, filled using MO_module
 	type(Nucleon), dimension(:,:), allocatable :: nucleus
 ! 	Variables used for analytic solution
+<<<<<<< f8ecfa0a313073c6540362884910bffeee3ffa04
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
 	COMPLEX(dp) :: 	Pf2P(2),Pf2P_ol,&
 			U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
@@ -314,6 +315,9 @@ program main
 	end do
 =======
 	COMPLEX(8) :: 	Pf2,WW_N(2*N_tot,2*N_tot),&
+=======
+	COMPLEX(8) :: 	Pf2H(2),Pf2P(2),WW_N(2*N_tot,2*N_tot),&
+>>>>>>> Finally managed to get the linking of the pfapack-library to workgit status!
 			U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
 			U_Z(N_tot,N_tot),V_Z(N_tot,N_tot)
 
@@ -330,7 +334,7 @@ program main
 
 	N=24		! Number of NEUTRONS to find
 	Z=24 		! Number of PROTONS to find
-
+	
 !-------Analytical solution using BCS-equations
 	allocate(nucleus(N_tot,2))
 
@@ -348,12 +352,20 @@ program main
 
 	!call ZPfaffian_EXT(WW,2*N_tot,2*N_tot,Ipiv,Pf)
 
-	call SKPF10(WW_N,Pf2) 
+	call ZSKPF10_F95(WW_N,Pf2P) 
+	call ZSKPF10_F95(WW_N,Pf2H,MTHD='H') 
 	
+<<<<<<< f8ecfa0a313073c6540362884910bffeee3ffa04
 	write(*,*) 'Product: ', real(prod_N)
 	write(*,*) 'Pf_Extended: ', real(Pf)
 	write(*,*) 'Pf_SKPF10: ', real(Pf2)
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
+=======
+	write(*,*) 'Product: ' 			, real(prod_N)
+	write(*,*) 'Pf_Extended: ' 		, real(Pf)
+	write(*,*) 'Pf_SKPF10, Parlett-Reid : ' , real(Pf2P)
+	write(*,*) 'Pf_SKPF10, Householder : ' 	, real(Pf2H)
+>>>>>>> Finally managed to get the linking of the pfapack-library to workgit status!
 
 	deallocate(nucleus)
 	close(unit=1)
