@@ -50,8 +50,9 @@ contains
 		end do
 	END Subroutine qpart_creator
 
-	FUNCTION WTW(U,V) result(WW)
-		complex(8) 	:: WW(2*N_tot,2*N_tot),U(N_tot,N_tot),V(N_tot,N_tot)
+	FUNCTION WTW(U,V,N) result(WW)
+		complex(8) 	:: WW(2*N,2*N),U(N,N,V(N,N)
+		integer 	:: N 
 
 		WW(1:N_tot,1:N_tot) = matmul(transpose(V),U)
 		WW(N_tot+1:2*N_tot,1:N_tot) = -matmul(transpose(V),V)
@@ -77,7 +78,7 @@ program main
 
 	Integer 	:: Ipiv(2*N_tot,2),Ipiv2(2*24,2),Ipiv22(2*24,2),Ipiv3(4,2)
 
-	REAL(8) 	:: scaleFactor(7)
+	REAL(8) 	:: scaleFactor(7),t1,t2,t3,t4
 
 	! Nbr of neutrons/protons and loop integer(s),
 	!integer :: i,j
@@ -94,22 +95,32 @@ program main
 	scaleFactor = (/0.5d0,0.75d0,1.d0,1.75d0,2.5d0,3d0,4d0/)
 	
 	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
-	WW_N = WTW(U_N,V_N)
+	WW_N = WTW(U_N,V_N,N_tot)
 
 	open(unit=1,file='data/performance.dat',status='replace')
 
 	factor=1
+	call cpu_time(t1)
 	Pf=overlap_pfaffian(factor,N_tot,N_tot,N_tot,U_N,U_N,V_N,V_N)
+	call cpu_time(t2)
 
 	!call ZPfaffian_EXT(WW,2*N_tot,2*N_tot,Ipiv,Pf)
 
 	call ZSKPF10_F95(WW_N,Pf2P) 
+	call cpu_time(t3)
 	call ZSKPF10_F95(WW_N,Pf2H,MTHD='H') 
+	call cpu_time(t4)
 	
 	write(*,*) 'Product: ' 			, real(prod_N)
+	write(*,*)
 	write(*,*) 'Pf_Extended: ' 		, real(Pf)
-	write(*,*) 'Pf_SKPF10, Parlett-Reid : ' , real(Pf2P)
-	write(*,*) 'Pf_SKPF10, Householder : ' 	, real(Pf2H)
+	write(*,*) 'elapsed time: ', t2-t1
+	write(*,*)
+	write(*,*) 'Pf_SKPF10, Parlett-Reid : ' , real(Pf2P) 	
+	write(*,*) 'elapsed time: ', t3-t2
+	write(*,*)
+	write(*,*) 'Pf_SKPF10, Householder : ' 	, real(Pf2H) 	
+	write(*,*) 'elapsed time: ', t4-t3
 
 	close(unit=1)
 	deallocate(nucleus)
