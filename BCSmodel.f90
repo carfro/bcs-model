@@ -5,7 +5,8 @@ module BCS
 	implicit none
 	integer, parameter :: N_tot=330
 contains
-
+! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
+! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
 	Subroutine qpart_creator(nucleus,N,Z,scalefactor,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
 
 		type(Nucleon), dimension(:,:),intent(in) 	:: nucleus
@@ -50,14 +51,27 @@ contains
 		end do
 	END Subroutine qpart_creator
 
+	FUNCTION prod_calc(V,N) result(prod)
+		complex(8) 		:: V(N,N) 
+		integer 		:: N,i
+		complex(kind=qp) 	:: prod
+		
+		prod=1
+		do i=1,N,2
+			if(i+1<=N) then
+				prod=prod*V(i,i+1)*V(i,i+1)
+			end if
+		end do
+	END FUNCTION prod_calc
+
 	FUNCTION WTW(U,V,N) result(WW)
-		complex(8) 	:: WW(2*N,2*N),U(N,N,V(N,N)
+		complex(8) 	:: WW(2*N,2*N),U(N,N),V(N,N)
 		integer 	:: N 
 
-		WW(1:N_tot,1:N_tot) = matmul(transpose(V),U)
-		WW(N_tot+1:2*N_tot,1:N_tot) = -matmul(transpose(V),V)
-		WW(1:N_tot,N_tot+1:2*N_tot) = matmul(transpose(V),U)
-		WW(N_tot+1:2*N_tot,N_tot+1:2*N_tot) = matmul(transpose(U),V)
+		WW(1:N,1:N) = matmul(transpose(V),U)
+		WW(N+1:2*N,1:N) = -matmul(transpose(V),V)
+		WW(1:N,N+1:2*N) = matmul(transpose(V),U)
+		WW(N+1:2*N,N+1:2*N) = matmul(transpose(U),V)
 	END FUNCTION WTW
 
 end module BCS
@@ -69,59 +83,98 @@ program main
 ! 	Nucleus, filled using MO_module
 	type(Nucleon), dimension(:,:), allocatable :: nucleus
 ! 	Variables used for analytic solution
-	COMPLEX(8) :: 	Pf2H(2),Pf2P(2),WW_N(2*N_tot,2*N_tot),&
+	COMPLEX(8) :: 	Pf2H(2),Pf2P(2),&
 			U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
 			U_Z(N_tot,N_tot),V_Z(N_tot,N_tot)
 
-	complex(kind=qp) :: Pf22,Pf,prod_N,prod_Z
+	COMPLEX(8), dimension(:,:), allocatable :: 	U_test,V_test,WW_N
+
+	complex(kind=qp) :: Pf,prod_N,prod_Z,prod_test
 	real(kind=qp) 	:: factor
 
-	Integer 	:: Ipiv(2*N_tot,2),Ipiv2(2*24,2),Ipiv22(2*24,2),Ipiv3(4,2)
+	REAL(8) 	:: scaleFactor(7),t1,t2,t3,t4,t5,st,step,mult
 
-	REAL(8) 	:: scaleFactor(7),t1,t2,t3,t4
+	character(26) :: prod_str,pf_str
+	character(24) :: pf2p_str,pf2h_str
+	character(18) :: char1
+	character(4) :: char2
 
 	! Nbr of neutrons/protons and loop integer(s),
-	!integer :: i,j
-	integer :: N,Z,siz,step
+	integer :: i
+	integer :: N,Z,N_mult
 
 	N=24		! Number of NEUTRONS to find
 	Z=24 		! Number of PROTONS to find
 	
+	scaleFactor = (/0.5d0,0.75d0,1.d0,1.75d0,2.5d0,3d0,4d0/)
+
 !-------Analytical solution using BCS-equations
 	allocate(nucleus(N_tot,2))
 
 	call nucleus_creator(N,Z,nucleus)
 
-	scaleFactor = (/0.5d0,0.75d0,1.d0,1.75d0,2.5d0,3d0,4d0/)
-	
 	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
-	WW_N = WTW(U_N,V_N,N_tot)
 
-	open(unit=1,file='data/performance.dat',status='replace')
-
-	factor=1
-	call cpu_time(t1)
-	Pf=overlap_pfaffian(factor,N_tot,N_tot,N_tot,U_N,U_N,V_N,V_N)
-	call cpu_time(t2)
-
-	!call ZPfaffian_EXT(WW,2*N_tot,2*N_tot,Ipiv,Pf)
-
-	call ZSKPF10_F95(WW_N,Pf2P) 
-	call cpu_time(t3)
-	call ZSKPF10_F95(WW_N,Pf2H,MTHD='H') 
-	call cpu_time(t4)
+	prod_test=prod_calc(V_N,N_tot)
 	
-	write(*,*) 'Product: ' 			, real(prod_N)
-	write(*,*)
-	write(*,*) 'Pf_Extended: ' 		, real(Pf)
-	write(*,*) 'elapsed time: ', t2-t1
-	write(*,*)
-	write(*,*) 'Pf_SKPF10, Parlett-Reid : ' , real(Pf2P) 	
-	write(*,*) 'elapsed time: ', t3-t2
-	write(*,*)
-	write(*,*) 'Pf_SKPF10, Householder : ' 	, real(Pf2H) 	
-	write(*,*) 'elapsed time: ', t4-t3
+!-------Test-loop for the pfaffians below	
+
+	open(unit=1,file='data/performance_err.dat',status='replace')
+	open(unit=2,file='data/performance_time.dat',status='replace')
+
+	! set start (st) and step-size for the testing loop
+	st=0.1
+	step=0.05
+	do i=1,19
+		mult=st + (i-1)*step
+		N_mult=floor(N_tot*mult) + mod(floor(N_tot*mult),2)
+
+		allocate(U_test(N_mult,N_mult),V_test(N_mult,N_mult),WW_N(2*N_mult,2*N_mult))
+
+		U_test=U_N(1:N_mult,1:N_mult)
+		V_test=V_N(1:N_mult,1:N_mult)
+		write(*,*) 'N_mult: ', N_mult, ',   i: ', i
+
+		WW_N = WTW(U_test,V_test,N_mult)
+
+		factor=1
+		call cpu_time(t1)
+		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
+			N_mult,U_test,U_test,V_test,V_test)
+		call cpu_time(t2)
+		call ZSKPF10_F95(WW_N,Pf2P) 
+		call cpu_time(t3)
+		call ZSKPF10_F95(WW_N,Pf2H,MTHD='H') 
+		call cpu_time(t4)
+		prod_test=prod_calc(V_test,N_mult)
+		call cpu_time(t5)
+
+		!write(pf2p_str,'(F18.15,A1,I4)') real(Pf2P(1)),'E',int(real(Pf2P(2)))
+		write(char1,'(F18.15)') real(Pf2P(1)); write(char2,'(I4)') int(real(Pf2P(2)))
+		pf2p_str=char1//'E'//trim(adjustl(char2))
+
+		!write(pf2h_str,'(F18.15,A1,F5.0)') real(Pf2H(1)),'E',real(Pf2H(2))
+		write(char1,'(F18.15)') real(Pf2H(1)); write(char2,'(I4)') int(real(Pf2H(2)))
+		pf2h_str=char1//'E'//trim(adjustl(char2))
+
+		write(prod_str,'(ES24.16)') real(prod_test)
+	!	prod_str=trim(adjustl(prod_str))
+		!write(*,*) prod_str
+		!write(*,*) index(prod_str(3:len(prod_str)),'-')+2
+		prod_str=prod_str(1:18)//'E'//prod_str(index(prod_str(3:len(prod_str)),'-')+2:len_trim(prod_str))
+
+		write(pf_str,'(ES24.16)') real(pf)
+	!	pf_str=trim(adjustl(pf_str))
+		pf_str=pf_str(1:18)//'E'//pf_str(index(pf_str(3:len(pf_str)),'-')+2:len_trim(pf_str))
+
+		! Writes product calculation, and pfaffian using: robledo, pfa_parlett-reid, pfa_householder
+		write(1,'(I4,5A,4(A25,A5))') N_mult ,char(9), prod_str,char(9), pf_str, char(9),Pf2P_str, char(9),Pf2H_str
+		! Writes time of product calculation, robledo, pfa_parlett-reid, pfa_householder
+		write(2,'(I4,4E24.16)') N_mult, t5-t4, t2-t1, t3-t2, t4-t3 
+		deallocate(U_test,V_test,WW_N)
+	end do
 
 	close(unit=1)
+	close(unit=2)
 	deallocate(nucleus)
 end program main
