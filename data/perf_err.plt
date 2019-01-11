@@ -7,7 +7,7 @@ set terminal epslatex size 12cm,9cm color colortext standalone
 
 # Error/Precision plot
 set output "perf_err.tex"
-set title "Precision as {\\footnotesize $| \\prod\\limits_{i}^{N/2} v_i^2 - \\text{Pf}_x (W^T W) |$ }" font ",20"
+set title "Precision as {\\tiny $| \\frac{\\prod\\limits_{i}^{N/2} v_i^2 - \\text{Pf}_x (W^T W)}{\\prod\\limits_{i}^{N/2} v_i^2 } |$ }" font ",20"
 
 # Color definitions
 #set border linewidth 1.5
@@ -35,12 +35,13 @@ set xlabel 'Size of matrix $n:W_{n \times n}$'
 set ylabel 'Absolute error' offset 1,-0.5
 set logscale y
 set ytics out offset -1.25,0
-set yrange [1e-300:1e0]
+set yrange [1e-30:1e250]
 set format '{\small$%g$}'
 set format y '{\small$10^{%T}$}'
 
 
-plot for [i=3:5] 'performance_err.dat' u 1:( abs( abs(column(i))- $2 ) ) title "Pf$_{".(i-2)."}$"
+plot for [i=3:5] 'performance_err.dat' u 1:i title "Pf$_{".(i-2)."}$"
+#plot for [i=3:5] 'performance_err.dat' u 1:( abs( abs(column(i))- $2 ) ) title "Pf$_{".(i-2)."}$"
 #plot for [i=3:5] 'performance_err.dat' u 1:( abs(column(i))  )
 
 set output
