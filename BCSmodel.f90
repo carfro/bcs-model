@@ -54,12 +54,14 @@ contains
 	FUNCTION prod_calc(V,N) result(prod)
 		complex(8) 		:: V(N,N) 
 		integer 		:: N,i
-		complex(kind=qp) 	:: prod
+		!complex(kind=qp) 	:: prod
+		real(kind=qp) 	:: prod
 		
 		prod=1
 		do i=1,N,2
 			if(i+1<=N) then
-				prod=prod*V(i,i+1)*V(i,i+1)
+				!prod=prod*V(i,i+1)*V(i,i+1)
+				prod=prod*V(i,i+1)**2
 			end if
 		end do
 	END FUNCTION prod_calc
@@ -89,14 +91,15 @@ program main
 
 	COMPLEX(8), dimension(:,:), allocatable :: 	U_test,V_test,WW_N
 
-	complex(kind=qp) :: Pf,prod_N,prod_Z,prod_test
-	real(kind=qp) 	:: factor
+	complex(kind=qp) :: Pf,prod_N,prod_Z
+	real(kind=qp) 	:: factor,pf2p_real,pf2h_real,prod_test
 
 	REAL(8) 	:: scaleFactor(7),t1,t2,t3,t4,t5,st,step,mult
 
-	character(26) :: prod_str,pf_str
-	character(24) :: pf2p_str,pf2h_str
-	character(18) :: char1
+	character(45) :: prod_str,pf_str
+	character(50) :: pf2h_str
+	character(45) :: pf2p_str
+	character(39) :: char1
 	character(4) :: char2
 
 	! Nbr of neutrons/protons and loop integer(s),
@@ -149,27 +152,42 @@ program main
 		prod_test=prod_calc(V_test,N_mult)
 		call cpu_time(t5)
 
-		!write(pf2p_str,'(F18.15,A1,I4)') real(Pf2P(1)),'E',int(real(Pf2P(2)))
-		write(char1,'(F18.15)') real(Pf2P(1)); write(char2,'(I4)') int(real(Pf2P(2)))
+		write(prod_str,'(ES43.36)') prod_test
+		!prod_str=prod_str(1:18)//'E'//prod_str(index(prod_str(3:len(prod_str)),'-')+2:len_trim(prod_str))
+		!read(prod_str,*)  prod_test
+
+		write(char1,'(F39.36)') real(Pf2P(1)); write(char2,'(I4)') int(real(Pf2P(2)))
 		pf2p_str=char1//'E'//trim(adjustl(char2))
+		read(pf2p_str,*) pf2p_real
+		pf2p_real=abs(abs(Pf2p_real)-prod_test)/prod_test
+		write(pf2p_str,'(ES43.36)') pf2p_real
 
-		!write(pf2h_str,'(F18.15,A1,F5.0)') real(Pf2H(1)),'E',real(Pf2H(2))
-		write(char1,'(F18.15)') real(Pf2H(1)); write(char2,'(I4)') int(real(Pf2H(2)))
-		pf2h_str=char1//'E'//trim(adjustl(char2))
+		!write(char1,'(F39.36)') real(Pf2h(1)); write(char2,'(I4)') int(real(Pf2h(2)))
+		!pf2h_str=char1//'E'//trim(adjustl(char2))
+		!read(pf2h_str,*) pf2h_real
+		pf2h_real=real(Pf2h(1))*10**real(Pf2h(2))
+		pf2h_real=abs(abs(Pf2h_real)-prod_test)/prod_test
+		write(*,*) pf2h_real
+	 	write(pf2h_str,*) pf2h_real
+		write(*,*) pf2h_str
+		!write(*,*) pf2h_str(1:index(pf2h_str,'E')-1)
+		!pf2h_str=pf2h_str(1:39)//'E'//pf2h_str(index(pf2h_str,'E')+1:len_trim(pf2h_str))
+		!write(*,*) pf2h_str
+		!pf2h_str=char1//'E'//trim(adjustl(char2))
+		!write(pf2h_str,'(ES43.36)') pf2h_real
+	!	
+		Pf=abs(abs(Pf)-prod_test)/prod_test
+		write(pf_str,'(ES43.36)') real(Pf)
 
-		write(prod_str,'(ES24.16)') real(prod_test)
-	!	prod_str=trim(adjustl(prod_str))
-		!write(*,*) prod_str
-		!write(*,*) index(prod_str(3:len(prod_str)),'-')+2
-		prod_str=prod_str(1:18)//'E'//prod_str(index(prod_str(3:len(prod_str)),'-')+2:len_trim(prod_str))
+! Writes product calculation, and pfaffian using: robledo, pfa_parlett-reid, pfa_householder
+		!write(*,'(I4,ES51.36)') N_mult , prod_test
+		write(*,'(I4,3A45,A50)') N_mult , prod_str,pf_str, pf2p_str, pf2h_str
+		write(1,'(I4,3A45,A50)') N_mult , prod_str,pf_str, pf2p_str, pf2h_str
+		!write(1,'(I4,5A,3(ES48.38,A5))') N_mult ,char(9), prod_test,char(9), abs(abs(Pf)-prod_test)&
+		!	, char(9),abs(abs(pf2h_real)-prod_test), char(9)!,abs(abs(Pf2p_real)-prod_test)
 
-		write(pf_str,'(ES24.16)') real(pf)
-	!	pf_str=trim(adjustl(pf_str))
-		pf_str=pf_str(1:18)//'E'//pf_str(index(pf_str(3:len(pf_str)),'-')+2:len_trim(pf_str))
-
-		! Writes product calculation, and pfaffian using: robledo, pfa_parlett-reid, pfa_householder
-		write(1,'(I4,5A,4(A25,A5))') N_mult ,char(9), prod_str,char(9), pf_str, char(9),Pf2P_str, char(9),Pf2H_str
-		! Writes time of product calculation, robledo, pfa_parlett-reid, pfa_householder
+		write(*,*)
+! Writes time of product calculation, robledo, pfa_parlett-reid, pfa_householder
 		write(2,'(I4,4E24.16)') N_mult, t5-t4, t2-t1, t3-t2, t4-t3 
 		deallocate(U_test,V_test,WW_N)
 	end do
