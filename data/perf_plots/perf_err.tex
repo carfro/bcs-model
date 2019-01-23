@@ -1,0 +1,189 @@
+% GNUPLOT: LaTeX picture with Postscript
+\documentclass{minimal}
+% Set font size
+\makeatletter
+\def\@ptsize{1}
+\InputIfFileExists{size11.clo}{}{%
+   \GenericError{(gnuplot) \space\space\space\@spaces}{%
+      Gnuplot Error: File `size11.clo' not found! Could not set font size%
+   }{See the gnuplot documentation for explanation.%
+   }{For using a font size a file `size<fontsize>.clo' has to exist.
+        Falling back ^^Jto default fontsize 10pt.}%
+  \def\@ptsize{0}
+  \input{size10.clo}%
+}%
+\makeatother
+% Load packages
+\usepackage{graphicx}
+\usepackage{color}
+\makeatletter
+% Select an appropriate default driver (from TeXLive graphics.cfg)
+\begingroup
+  \chardef\x=0 %
+  % check pdfTeX
+  \@ifundefined{pdfoutput}{}{%
+    \ifcase\pdfoutput
+    \else
+      \chardef\x=1 %
+    \fi
+  }%
+  % check VTeX
+  \@ifundefined{OpMode}{}{%
+    \chardef\x=2 %
+  }%
+\expandafter\endgroup
+\ifcase\x
+  % default case
+  \PassOptionsToPackage{dvips}{geometry}
+\or
+  % pdfTeX is running in pdf mode
+  \PassOptionsToPackage{pdftex}{geometry}
+\else
+  % VTeX is running
+  \PassOptionsToPackage{vtex}{geometry}
+\fi
+\makeatother
+% Set papersize
+\usepackage[papersize={680.30bp,510.20bp},text={680.30bp,510.20bp}]{geometry}
+% No page numbers and no paragraph indentation
+\pagestyle{empty}
+\setlength{\parindent}{0bp}%
+% Load configuration file
+\InputIfFileExists{gnuplot.cfg}{%
+  \typeout{Using configuration file gnuplot.cfg}%
+}{%
+ \typeout{No configuration file gnuplot.cfg found.}%
+}%
+%
+\begin{document}
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \GenericError{(gnuplot) \space\space\space\@spaces}{%
+      Package color not loaded in conjunction with
+      terminal option `colourtext'%
+    }{See the gnuplot documentation for explanation.%
+    }{Either use 'blacktext' in gnuplot or load the package
+      color.sty in LaTeX.}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\includegraphics[2][]{%
+    \GenericError{(gnuplot) \space\space\space\@spaces}{%
+      Package graphicx or graphics not loaded%
+    }{See the gnuplot documentation for explanation.%
+    }{The gnuplot epslatex terminal needs graphicx.sty or graphics.sty.}%
+    \renewcommand\includegraphics[2][]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \@ifundefined{ifGPcolor}{%
+    \newif\ifGPcolor
+    \GPcolortrue
+  }{}%
+  \@ifundefined{ifGPblacktext}{%
+    \newif\ifGPblacktext
+    \GPblacktextfalse
+  }{}%
+  % define a \g@addto@macro without @ in the name:
+  \let\gplgaddtomacro\g@addto@macro
+  % define empty templates for all commands taking text:
+  \gdef\gplbacktext{}%
+  \gdef\gplfronttext{}%
+  \makeatother
+  \ifGPblacktext
+    % no textcolor at all
+    \def\colorrgb#1{}%
+    \def\colorgray#1{}%
+  \else
+    % gray or color?
+    \ifGPcolor
+      \def\colorrgb#1{\color[rgb]{#1}}%
+      \def\colorgray#1{\color[gray]{#1}}%
+      \expandafter\def\csname LTw\endcsname{\color{white}}%
+      \expandafter\def\csname LTb\endcsname{\color{black}}%
+      \expandafter\def\csname LTa\endcsname{\color{black}}%
+      \expandafter\def\csname LT0\endcsname{\color[rgb]{1,0,0}}%
+      \expandafter\def\csname LT1\endcsname{\color[rgb]{0,1,0}}%
+      \expandafter\def\csname LT2\endcsname{\color[rgb]{0,0,1}}%
+      \expandafter\def\csname LT3\endcsname{\color[rgb]{1,0,1}}%
+      \expandafter\def\csname LT4\endcsname{\color[rgb]{0,1,1}}%
+      \expandafter\def\csname LT5\endcsname{\color[rgb]{1,1,0}}%
+      \expandafter\def\csname LT6\endcsname{\color[rgb]{0,0,0}}%
+      \expandafter\def\csname LT7\endcsname{\color[rgb]{1,0.3,0}}%
+      \expandafter\def\csname LT8\endcsname{\color[rgb]{0.5,0.5,0.5}}%
+    \else
+      % gray
+      \def\colorrgb#1{\color{black}}%
+      \def\colorgray#1{\color[gray]{#1}}%
+      \expandafter\def\csname LTw\endcsname{\color{white}}%
+      \expandafter\def\csname LTb\endcsname{\color{black}}%
+      \expandafter\def\csname LTa\endcsname{\color{black}}%
+      \expandafter\def\csname LT0\endcsname{\color{black}}%
+      \expandafter\def\csname LT1\endcsname{\color{black}}%
+      \expandafter\def\csname LT2\endcsname{\color{black}}%
+      \expandafter\def\csname LT3\endcsname{\color{black}}%
+      \expandafter\def\csname LT4\endcsname{\color{black}}%
+      \expandafter\def\csname LT5\endcsname{\color{black}}%
+      \expandafter\def\csname LT6\endcsname{\color{black}}%
+      \expandafter\def\csname LT7\endcsname{\color{black}}%
+      \expandafter\def\csname LT8\endcsname{\color{black}}%
+    \fi
+  \fi
+    \setlength{\unitlength}{0.0500bp}%
+    \ifx\gptboxheight\undefined%
+      \newlength{\gptboxheight}%
+      \newlength{\gptboxwidth}%
+      \newsavebox{\gptboxtext}%
+    \fi%
+    \setlength{\fboxrule}{0.5pt}%
+    \setlength{\fboxsep}{1pt}%
+\begin{picture}(13606.00,10204.00)%
+    \gplgaddtomacro\gplbacktext{%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,767){\makebox(0,0){\small$10^{-18}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,2233){\makebox(0,0){\small$10^{-17}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,3699){\makebox(0,0){\small$10^{-16}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,5165){\makebox(0,0){\small$10^{-15}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,6631){\makebox(0,0){\small$10^{-14}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,8097){\makebox(0,0){\small$10^{-13}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1045,9563){\makebox(0,0){\small$10^{-12}$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(1405,484){\makebox(0,0){\small$0$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(2554,484){\makebox(0,0){\small$50$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(3704,484){\makebox(0,0){\small$100$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(4853,484){\makebox(0,0){\small$150$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(6002,484){\makebox(0,0){\small$200$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(7151,484){\makebox(0,0){\small$250$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(8301,484){\makebox(0,0){\small$300$}}%
+      \colorrgb{0.50,0.50,0.50}%
+      \put(9450,484){\makebox(0,0){\small$350$}}%
+    }%
+    \gplgaddtomacro\gplfronttext{%
+      \csname LTb\endcsname%
+      \put(176,5165){\rotatebox{-270}{\makebox(0,0){\strut{}Relative error}}}%
+      \put(5427,154){\makebox(0,0){\strut{}Size of matrix $n:W_{n \times n}$}}%
+      \put(5427,9873){\makebox(0,0){\strut{}Precision as {\tiny $\prod\limits_{i}^{N/2} v_i^2:=\text{Prod}(v_i)$}, {\tiny $| \frac{\text{Prod}(v_i) - \text{Pf}_x (W^T W)}{\text{Prod}(v_i)} |$ }}}%
+      \csname LTb\endcsname%
+      \put(12618,9453){\makebox(0,0)[r]{\strut{}Pf$_{\text{G-C,Robledo,Bertsch}}$}}%
+      \csname LTb\endcsname%
+      \put(12618,9233){\makebox(0,0)[r]{\strut{}Pf$_{\text{Wimmer;Parlett-Reid}}$}}%
+      \csname LTb\endcsname%
+      \put(12618,9013){\makebox(0,0)[r]{\strut{}Pf$_{\text{Wimmer;Housholder}}$}}%
+    }%
+    \gplbacktext
+    \put(0,0){\includegraphics{perf_err-inc}}%
+    \gplfronttext
+  \end{picture}%
+\endgroup
+\end{document}

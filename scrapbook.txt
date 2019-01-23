@@ -129,3 +129,175 @@
 	close(unit=5)
 	close(unit=6)
 	deallocate(nucleus,EV_N)
+
+
+
+
+!--------------------------------------------------------------------------------------------------------------------------
+		write(prod_str,'(ES43.36)') prod_test
+		!prod_str=prod_str(1:18)//'E'//prod_str(index(prod_str(3:len(prod_str)),'-')+2:len_trim(prod_str))
+		!read(prod_str,*)  prod_test
+
+		write(char1,'(F39.36)') real(Pf2P(1)); write(char2,'(I4)') int(real(Pf2P(2)))
+		pf2p_str=char1//'E'//trim(adjustl(char2))
+		read(pf2p_str,*) pf2p_real
+	!	write(*,*) 'prod_test'
+	!	write(*,*) prod_test
+	!	write(*,*) 'pf2p_real'
+	!	write(*,*) pf2p_real
+		pf2p_real=abs(abs(Pf2p_real)-prod_test)/prod_test
+		!write(*,*) 'Rel err pf2p'
+		!write(*,*) pf2p_real
+		write(pf2p_str,'(ES43.36)') pf2p_real
+	!	write(*,*) 'pf2p_str'
+	!	write(*,*) pf2p_str
+	!	pf2p_str=pf2p_str(1:39)//'E'//pf2p_str(index(pf2p_str,'E')+1:len_trim(pf2p_str))
+	!	write(*,*) 'pf2p_str'
+	!	write(*,*) pf2p_str
+
+		pf2h_real=real(Pf2h(1))*10**real(Pf2h(2))
+	!	write(*,*) 'pf2h_real'
+	!	write(*,*) pf2h_real
+		pf2h_real=abs(abs(Pf2h_real)-prod_test)/prod_test
+	!	write(*,*) 'Rel err pf2h'
+	!	write(*,*) pf2h_real
+		write(pf2h_str,'(ES43.36)') pf2h_real
+		!write(*,*) pf2h_str
+	!	pf2h_str=pf2h_str(1:39)//'E'//pf2h_str(index(pf2h_str(3:len(pf2h_str)),'-')+2:len_trim(pf2h_str))
+		
+!		write(*,*) 'Pf'
+!		write(*,*) real(Pf)
+		Pf=abs(abs(Pf)-prod_test)/prod_test
+	!	write(*,*) 'Rel err pf'
+	!	write(*,*) real(Pf)
+		write(pf_str,'(ES43.36)') real(Pf)
+	!	pf_str=trim(adjustl(pf_str))
+	!	pf_str=pf_str(1:18)//'E'//pf_str(index(pf_str(3:len(pf_str)),'-')+2:len_trim(pf_str))
+
+! Writes product calculation, and pfaffian using: robledo, pfa_parlett-reid, pfa_householder
+		!write(*,'(I4,ES51.36)') N_mult , prod_test
+		write(1,'(I4,4A45)') N_mult , prod_str,pf_str, pf2p_str, pf2h_str
+		!write(1,'(I4,5A,3(ES48.38,A5))') N_mult ,char(9), prod_test,char(9), abs(abs(Pf)-prod_test)&
+		!	, char(9),abs(abs(pf2h_real)-prod_test), char(9)!,abs(abs(Pf2p_real)-prod_test)
+! -----------------------------------------------------------------------------------------------------------------------
+		write(prod_str,'(ES43.36)') prod_test
+		!prod_str=prod_str(1:18)//'E'//prod_str(index(prod_str(3:len(prod_str)),'-')+2:len_trim(prod_str))
+		!read(prod_str,*)  prod_test
+
+		write(char1,'(F39.36)') real(Pf2P(1)); write(char2,'(I4)') int(real(Pf2P(2)))
+		pf2p_str=char1//'E'//trim(adjustl(char2))
+		read(pf2p_str,*) pf2p_real
+		pf2p_real=abs(abs(Pf2p_real)-prod_test)/prod_test
+		write(pf2p_str,'(ES43.36)') pf2p_real
+
+		!write(char1,'(F39.36)') real(Pf2h(1)); write(char2,'(I4)') int(real(Pf2h(2)))
+		!pf2h_str=char1//'E'//trim(adjustl(char2))
+		!read(pf2h_str,*) pf2h_real
+		pf2h_real=real(Pf2h(1))*10**real(Pf2h(2))
+		pf2h_real=abs(abs(Pf2h_real)-prod_test)/prod_test
+		!write(*,*) pf2h_real
+	 	write(pf2h_str,*) pf2h_real
+	 	!write(pf2h_str,'(ES43.36)') pf2h_real
+		!write(*,*) pf2h_str
+		!write(*,*) pf2h_str(1:index(pf2h_str,'E')-1)
+		!pf2h_str=pf2h_str(1:39)//'E'//pf2h_str(index(pf2h_str,'E')+1:len_trim(pf2h_str))
+		!write(*,*) pf2h_str
+		!pf2h_str=char1//'E'//trim(adjustl(char2))
+		!write(pf2h_str,'(ES43.36)') pf2h_real
+	!	
+		Pf=abs(abs(Pf)-prod_test)/prod_test
+		write(pf_str,'(ES43.36)') real(Pf)
+
+! Writes product calculation, and pfaffian using: robledo, pfa_parlett-reid, pfa_householder
+		!write(*,'(I4,ES51.36)') N_mult , prod_test
+		write(*,'(I4,3A45,A50)') N_mult , prod_str,pf_str, pf2p_str, pf2h_str
+		write(1,'(I4,3A45,A50)') N_mult , prod_str,pf_str, pf2p_str, pf2h_str
+		!write(1,'(I4,5A,3(ES48.38,A5))') N_mult ,char(9), prod_test,char(9), abs(abs(Pf)-prod_test)&
+		!	, char(9),abs(abs(pf2h_real)-prod_test), char(9)!,abs(abs(Pf2p_real)-prod_test)
+
+
+# ----------------------------------------------------------------------
+
+#            Targets
+# ----------------------------------------------------------------------
+# "make" will build all
+all: $(MAIN)
+	
+$(MAIN):$(OBJECTS) 
+	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack
+%.o: %.f90
+	$(FC) $(FFLAGS) $(LIBS) $(MFLAG) -c $<  -o $@
+# Utility targets
+clean: 
+	rm -f $(OBJ_DIR)/*.o $(MOD_DIR)/*.mod *.o *.mod $(MAIN_TARGET)
+------ PRJECTION------------
+
+!------ DMAT TEST -------
+	DMAT=DMAT_CREATOR(0d0,N_tot)
+	do i=1,N_tot
+		do j=1,N_tot
+			if ((DMAT(i,j)/=cmplx(0,0,16)) .AND. (DMAT(i,j)/=cmplx(1,0,16))) then
+				write(*,*) i,j
+				write(*,*) DMAT(i,j)
+			end if 
+		end do 
+	end do 
+
+!-------- WW creator test ------------
+!	WW_D(1:N_tot,1:N_tot) = matmul(transpose(V_N),U_N)
+!	WW_D((N_tot+1):(2*N_tot),1:N_tot) = -matmul(transpose(conjg(V_N)),matmul(transpose(DMAT),V_N))
+!	WW_D(1:N_tot,(N_tot+1):2*N_tot) = matmul(transpose(V_N),matmul(DMAT,conjg(V_N)))
+!	WW_D((N_tot+1):(2*N_tot),(N_tot+1):(2*N_tot)) = matmul(transpose(conjg(U_N)),conjg(V_N))
+!
+!	WW_N(1:N_tot,1:N_tot) = matmul(transpose(V_N),U_N)
+!	WW_N(N_tot+1:2*N_tot,1:N_tot) = -matmul(transpose(V_N),V_N)
+!	WW_N(1:N_tot,N_tot+1:2*N_tot) = matmul(transpose(V_N),V_N)
+!	WW_N(N_tot+1:2*N_tot,N_tot+1:2*N_tot) = matmul(transpose(U_N),V_N)
+!
+!	do i=1,2*N_tot
+!		do j=1,2*N_tot
+!			if (WW_D(i,j) /= WW_N(i,j)) then 
+!				write(*,*) i,j
+!				write(*,*) 'WW_D', WW_D(i,j)
+!				write(*,*) 'WW_N', WW_N(i,j)
+!			end if
+!		end do
+!	end do
+
+!---------Pfaffian test---------------------------
+!	do i=1,7
+!
+!		call qpart_creator(nucleus,N,Z,scalefactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+!		WW_N = WTW(U_N,V_N,N_tot)
+!
+!		write(*,*) 'Scalefactor ',scalefactor(i)
+!		call ZSKPF10_F95(WW_N,PF2P)
+!		write(*,*) real(PF2P(1))*ten_quad**real(PF2P(2))
+!		Pf2P=ZSKPF10_OVERLAPP(N_tot,U_N,U_N,V_N,V_N,DMAT)
+!		write(*,*) 'Pfaffian : ',real(PF2P(1))*ten_quad**real(PF2P(2))
+!		write(*,*) 
+!        end do
+!-------Test-loop for the particle nbr op exp value
+
+	N_loop=3
+	dPhi=2*pi/(2*N_loop+1)	
+
+	N_op=10
+	N_exp=22
+
+!--------PROJECTOR TEST ----------
+	summ=0
+	do i=-1*N_loop,N_loop
+		DMAT=DMAT_CREATOR(i*dPhi,N_tot)
+		!DMAT=DMAT_CREATOR(0d0,N_tot)
+		Pf2P_ol=ZSKPF10_OVERLAPP(N_tot,U_N,U_N,V_N,V_N,DMAT)
+		!write(*,*) Pf2P_ol
+		summ= summ + 1/(2*PI)*dPhi*exp(cmplx(0,-1*dPhi*i*N_exp,16))*Pf2P_ol
+		!summ= summ + 1/(2*PI)*dPhi*exp(cmplx(0,-1*dPhi*i*N_exp,16))*real(PF2P(1))*ten_quad**real(PF2P(2))
+		!summ= summ + 1/(2*PI)*dPhi*exp(cmplx(0,-dPhi*i*N_exp,8))*exp(cmplx(0,dPhi*i*N_op,8))
+
+	end do
+	
+
+
+	write(*,*) summ
