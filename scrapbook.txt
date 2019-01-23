@@ -129,7 +129,10 @@
 	close(unit=5)
 	close(unit=6)
 	deallocate(nucleus,EV_N)
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
+=======
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 
 
 
@@ -302,5 +305,8 @@ clean:
 
 
 	write(*,*) summ
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 =======
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
+=======
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector

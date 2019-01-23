@@ -5,6 +5,7 @@ module BCS
 	USE F95_PFAPACK
 	implicit none
 	integer, parameter :: N_tot=330
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
 	real(8), parameter :: PI=4.D0*DATAN(1.D0)
 	real(kind=qp), parameter :: ten_quad = 10.
@@ -177,24 +178,29 @@ contains
 	END FUNCTION DMAT_CREATOR
 	
 =======
+=======
+	real(8), parameter :: PI=4.D0*DATAN(1.D0)
+	real(kind=qp), parameter :: ten_quad = 10.
+
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 contains
 ! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
 ! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
 	Subroutine qpart_creator(nucleus,N,Z,scalefactor,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
 
 		type(Nucleon), dimension(:,:),intent(in) 	:: nucleus
-		real(8),intent(in)				:: scaleFactor
+		real(dp),intent(in)				:: scaleFactor
 		integer,intent(in) 				:: N,Z
 
-		complex(kind=qp),intent(out)			:: prod_N,prod_Z
-		complex(8),intent(out) 				:: U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
+		COMPLEX(kind=qp),intent(out)			:: prod_N,prod_Z
+		COMPLEX(dp),intent(out) 				:: U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
 								U_Z(N_tot,N_tot),V_Z(N_tot,N_tot)
 
-		real(8) 	:: Theta_N(N_tot),Theta_Z(N_tot),&
+		real(dp) 	:: Theta_N(N_tot),Theta_Z(N_tot),&
 				lam_sN,lam_sZ,tol,EV_N(N_tot,2),EV_Z(N_tot,2)
 		integer 	:: i,j,step
 
-		step=1000 	! Nbr of points in \lambda vector
+		step=100000 	! Nbr of points in \lambda vector
 		tol=0.001	! tolerance to find root
 
 		call analytic_solve_sweep(nucleus,N,Z,step,tol,&
@@ -224,10 +230,40 @@ contains
 		end do
 	END Subroutine qpart_creator
 
-	FUNCTION prod_calc(V,N) result(prod)
-		complex(8) 		:: V(N,N) 
+	FUNCTION prod_sqrt(V,N) result(prod)
+		COMPLEX(dp) 		:: V(N,N) 
 		integer 		:: N,i
-		!complex(kind=qp) 	:: prod
+		COMPLEX(kind=qp) 	:: prod
+		
+		prod=1
+		do i=1,N,2
+			if(i+1<=N) then
+				!prod=prod*V(i,i+1)*V(i,i+1)
+				prod=prod*V(i,i+1)
+			end if
+		end do
+	END FUNCTION prod_sqrt
+
+	FUNCTION sum_check(V,N) result(summ)
+		COMPLEX(dp) 		:: V(N,N) 
+		integer 		:: N,i
+		!COMPLEX(kind=qp) 	:: prod
+		real(kind=qp) 	:: summ
+		
+		summ=0
+		do i=1,N
+			if(i+1<=N) then
+				!prod=prod*V(i,i+1)*V(i,i+1)
+			!	write(*,*) V(i,i+1)
+				summ=summ+V(i,i+1)**2
+			end if
+		end do
+	END FUNCTION sum_check
+
+	FUNCTION prod_calc(V,N) result(prod)
+		COMPLEX(dp) 		:: V(N,N) 
+		integer 		:: N,i
+		!COMPLEX(kind=qp) 	:: prod
 		real(kind=qp) 	:: prod
 		
 		prod=1
@@ -240,25 +276,74 @@ contains
 	END FUNCTION prod_calc
 
 	FUNCTION WTW(U,V,N) result(WW)
-		complex(8) 	:: WW(2*N,2*N),U(N,N),V(N,N)
+		COMPLEX(dp) 	:: WW(2*N,2*N),U(N,N),V(N,N)
 		integer 	:: N 
 
 		WW(1:N,1:N) = matmul(transpose(V),U)
 		WW(N+1:2*N,1:N) = -matmul(transpose(V),V)
-		WW(1:N,N+1:2*N) = matmul(transpose(V),U)
+		WW(1:N,N+1:2*N) = matmul(transpose(V),V)
 		WW(N+1:2*N,N+1:2*N) = matmul(transpose(U),V)
 	END FUNCTION WTW
 
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
+=======
+	FUNCTION ZSKPF10_OVERLAPP(N,UD,UM,VD,VM,DMAT) result(Pf2P_out)
+		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
+		implicit none
+
+		integer, intent(in) :: N
+		COMPLEX(dp) :: WTW(2*N,2*N)
+		COMPLEX(dp),dimension(N,N), intent(in) :: DMAT, UD, VD, UM, VM
+		!REAL(kind=qp)	:: 	Pf2P_out
+		COMPLEX(dp)	:: 	Pf2P(2),Pf2P_out
+		integer :: i,j,S_n
+
+		S_n=(-1)**(N_tot*(N_tot-1)/2)
+		
+		WTW(1:N,1:N) = matmul(transpose(VM),UM)
+		WTW((N+1):(2*N),1:N) = -matmul(transpose(conjg(VD)),matmul(transpose(DMAT),VM))
+		WTW(1:N,(N+1):2*N) = matmul(transpose(VM),matmul(DMAT,conjg(VD)))
+		WTW((N+1):(2*N),(N+1):(2*N)) = matmul(transpose(conjg(UD)),conjg(VD))
+
+		call ZSKPF10_F95(WTW,Pf2P) 
+		Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(prod_calc(VD,N))
+		!Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(prod_sqrt(VM,N)*prod_sqrt(VD,N))
+	
+	END FUNCTION ZSKPF10_OVERLAPP
+
+	
+	FUNCTION DMAT_CREATOR(phi,N) result(DMAT)
+		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
+		implicit none
+
+		integer, intent(in):: N
+		real(dp), intent(in) :: phi
+		
+		COMPLEX(dp), dimension(N,N) :: DMAT
+
+		COMPLEX(dp) :: z_no
+		integer :: i
+
+		z_no = cmplx(0,phi,16)
+		DMAT=0
+
+		do i=1,N
+			DMAT(i,i) = exp(z_no)
+		end do 
+
+	END FUNCTION DMAT_CREATOR
+	
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 end module BCS
 ! Constructs the BCS-model and computes the system for \lambda=[1..-1] and plots the result versus number of particles
 program main
 	use BCS
-	USE F95_PFAPACK
 	implicit none
 ! 	Nucleus, filled using MO_module
 	type(Nucleon), dimension(:,:), allocatable :: nucleus
 ! 	Variables used for analytic solution
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 <<<<<<< 56f1d0abafcb13c8470f19f2d610ccb98fef0fc6
 <<<<<<< f8ecfa0a313073c6540362884910bffeee3ffa04
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
@@ -339,25 +424,24 @@ program main
 =======
 	COMPLEX(8) :: 	Pf2H(2),Pf2P(2),&
 >>>>>>> The test of pfaffian routines aswell as plots of their abs. error and runtimes have now been made. The error measure is not a very good one, will look into making it a relative one - right now the number doesn't say much. It would also be nice to run precision measurements on more realistic wavefunctions W.
+=======
+	COMPLEX(dp) :: 	Pf2P(2),Pf2P_ol,&
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 			U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
-			U_Z(N_tot,N_tot),V_Z(N_tot,N_tot)
+			U_Z(N_tot,N_tot),V_Z(N_tot,N_tot),&
+			DMAT(N_tot,N_tot),&
+		       	WW_N(2*N_tot,2*N_tot), WW_D(2*N_tot,2*N_tot)
 
-	COMPLEX(8), dimension(:,:), allocatable :: 	U_test,V_test,WW_N
+	COMPLEX(kind=qp) :: prod_N,prod_Z,summ
+	!REAL(dp) 	:: Pf2P_out
 
-	complex(kind=qp) :: Pf,prod_N,prod_Z
-	real(kind=qp) 	:: factor,pf2p_real,pf2h_real,prod_test
 
-	REAL(8) 	:: scaleFactor(7),t1,t2,t3,t4,t5,st,step,mult
+	REAL(dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
 
-	character(45) :: prod_str,pf_str
-	character(50) :: pf2h_str
-	character(45) :: pf2p_str
-	character(39) :: char1
-	character(4) :: char2
 
 	! Nbr of neutrons/protons and loop integer(s),
-	integer :: i
-	integer :: N,Z,N_mult
+	integer :: i,j,N_loop
+	integer :: N,Z
 
 	N=24		! Number of NEUTRONS to find
 	Z=24 		! Number of PROTONS to find
@@ -369,8 +453,9 @@ program main
 
 	call nucleus_creator(N,Z,nucleus)
 
-	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	call qpart_creator(nucleus,N,Z,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
 
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 	prod_test=prod_calc(V_N,N_tot)
 	
 <<<<<<< 56f1d0abafcb13c8470f19f2d610ccb98fef0fc6
@@ -467,9 +552,31 @@ program main
 ! Writes time of product calculation, robledo, pfa_parlett-reid, pfa_householder
 		write(2,'(I4,4E24.16)') N_mult, t5-t4, t2-t1, t3-t2, t4-t3 
 		deallocate(U_test,V_test,WW_N)
+=======
+!-------Test-loop for the particle nbr op exp value
+
+	N_loop=3
+	dPhi=2*pi/(2*N_loop+1)	
+
+	N_op=10
+	N_exp=24
+
+!--------PROJECTOR TEST ----------
+	do j=N_exp-N_loop,N_exp+N_loop
+		write(*,*) j
+		summ=0
+		do i=-1*N_loop,N_loop
+			DMAT=DMAT_CREATOR(i*dPhi,N_tot)
+			Pf2P_ol=ZSKPF10_OVERLAPP(N_tot,U_N,U_N,V_N,V_N,DMAT)
+			summ= summ + 1/(2*PI)*dPhi*exp(cmplx(0,-1*dPhi*i*j,16))*Pf2P_ol
+
+		end do
+		write(*,*) summ
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 	end do
 >>>>>>> The test of pfaffian routines aswell as plots of their abs. error and runtimes have now been made. The error measure is not a very good one, will look into making it a relative one - right now the number doesn't say much. It would also be nice to run precision measurements on more realistic wavefunctions W.
 
+<<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 	deallocate(nucleus)
 	close(unit=1)
 <<<<<<< 56f1d0abafcb13c8470f19f2d610ccb98fef0fc6
@@ -479,6 +586,8 @@ program main
 =======
 	close(unit=2)
 >>>>>>> The test of pfaffian routines aswell as plots of their abs. error and runtimes have now been made. The error measure is not a very good one, will look into making it a relative one - right now the number doesn't say much. It would also be nice to run precision measurements on more realistic wavefunctions W.
+=======
+>>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 	deallocate(nucleus)
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
 end program main
