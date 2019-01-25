@@ -125,6 +125,7 @@ contains
 	END FUNCTION WTW
 
 	SUBROUTINE ZSKPF10_OVERLAPP(Pf2P_out,N,UD,UM,VD,VM,DMAT,get_norm) 
+<<<<<<< 4a8e749bb2e5597a330efac1e9fb799123643e5d
 		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
 		implicit none
 
@@ -289,28 +290,37 @@ contains
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
 =======
 	FUNCTION ZSKPF10_OVERLAPP(N,UD,UM,VD,VM,DMAT) result(Pf2P_out)
+=======
+>>>>>>> Trying to figure out why the part. no. op. is not working. A check using the onishi formula might be usefull. Printing results to visualize, will remove later.
 		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
 		implicit none
 
 		integer, intent(in) :: N
-		COMPLEX(dp) :: WTW(2*N,2*N)
-		COMPLEX(dp),dimension(N,N), intent(in) :: DMAT, UD, VD, UM, VM
-		!REAL(kind=qp)	:: 	Pf2P_out
-		COMPLEX(dp)	:: 	Pf2P(2),Pf2P_out
-		integer :: i,j,S_n
+		COMPLEX(kind=dp),dimension(N,N), intent(in) :: DMAT, UD, VD, UM, VM
+		REAL(kind=qp), intent(in), optional	:: 	get_norm
 
-		S_n=(-1)**(N_tot*(N_tot-1)/2)
-		
+		COMPLEX(kind=dp) 	:: 	WTW(2*N,2*N)
+		COMPLEX(kind=dp)	:: 	Pf2P(2),Pf2P_out
+		REAL(kind=qp) 		:: 	norm
+		integer 		:: 	i,j,S_n
+
+		S_n=(-1)**(N*(N-1)/2)
+
+		if( present(get_norm)) then
+			norm=get_norm
+		else
+			norm=norm_fac(UD,VD,N)
+		end if
+
 		WTW(1:N,1:N) = matmul(transpose(VM),UM)
 		WTW((N+1):(2*N),1:N) = -matmul(transpose(conjg(VD)),matmul(transpose(DMAT),VM))
 		WTW(1:N,(N+1):2*N) = matmul(transpose(VM),matmul(DMAT,conjg(VD)))
 		WTW((N+1):(2*N),(N+1):(2*N)) = matmul(transpose(conjg(UD)),conjg(VD))
 
 		call ZSKPF10_F95(WTW,Pf2P) 
-		Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(prod_calc(VD,N))
-		!Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(prod_sqrt(VM,N)*prod_sqrt(VD,N))
-	
-	END FUNCTION ZSKPF10_OVERLAPP
+		Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(norm)
+
+	END SUBROUTINE ZSKPF10_OVERLAPP
 
 	
 	FUNCTION DMAT_CREATOR(phi,N) result(DMAT)
@@ -355,6 +365,7 @@ program main
 
 	COMPLEX(kind=qp) :: prod_N,prod_Z,summ,summ2
 	REAL(kind=qp) 	:: norm
+<<<<<<< 4a8e749bb2e5597a330efac1e9fb799123643e5d
 
 
 	REAL(kind=dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
@@ -434,9 +445,11 @@ program main
 
 	COMPLEX(kind=qp) :: prod_N,prod_Z,summ
 	!REAL(dp) 	:: Pf2P_out
+=======
+>>>>>>> Trying to figure out why the part. no. op. is not working. A check using the onishi formula might be usefull. Printing results to visualize, will remove later.
 
 
-	REAL(dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
+	REAL(kind=dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
 
 
 	! Nbr of neutrons/protons and loop integer(s),
@@ -453,7 +466,16 @@ program main
 
 	call nucleus_creator(N,Z,nucleus)
 
-	call qpart_creator(nucleus,N,Z,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+!-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
+
+	!DMAT=DMAT_CREATOR(0d0,N_tot)
+	!do i=1,7
+	!	call qpart_creator(nucleus,N,Z,scaleFactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	!	call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT)
+	!	write(*,*) 'Pairing strength scaled by : ',scaleFactor(i)
+	!	write(*,*) 'Pfaffian_olverlap : ', real(Pf2P_ol)
+	!	write(*,*) 
+        !end do
 
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 	prod_test=prod_calc(V_N,N_tot)
@@ -555,24 +577,39 @@ program main
 =======
 !-------Test-loop for the particle nbr op exp value
 
-	N_loop=3
-	dPhi=2*pi/(2*N_loop+1)	
+	call qpart_creator(nucleus,N,Z,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	open(unit=1,file='data/part_no_test.dat',status='replace')
+	open(unit=2,file='data/phase_proj_test.dat',status='replace')
+	
+	norm=norm_fac(U_N,V_N,N_tot)
 
-	N_op=10
+	N_loop=8*24
+	dPhi=2*PI/(2*N_loop+1)	
+
+	N_op=24
 	N_exp=24
 
-!--------PROJECTOR TEST ----------
-	do j=N_exp-N_loop,N_exp+N_loop
+	do j=N_exp,N_exp!N_exp-2,N_exp+2
 		write(*,*) j
 		summ=0
+		summ2=0
 		do i=-1*N_loop,N_loop
-			DMAT=DMAT_CREATOR(i*dPhi,N_tot)
-			Pf2P_ol=ZSKPF10_OVERLAPP(N_tot,U_N,U_N,V_N,V_N,DMAT)
-			summ= summ + 1/(2*PI)*dPhi*exp(cmplx(0,-1*dPhi*i*j,16))*Pf2P_ol
-
+			DMAT=DMAT_CREATOR(1*i*dPhi,N_tot)
+			call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT,norm)
+			write(2,'(I4,2ES48.38)') i,i*dPhi, real(Pf2P_ol)**2
+			summ= summ + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*Pf2P_ol
+			summ2= summ2 + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*exp(cmplx(0,1*dPhi*i*N_exp,16))
 		end do
+<<<<<<< 4a8e749bb2e5597a330efac1e9fb799123643e5d
 		write(*,*) summ
 >>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
+=======
+		summ=1/(2*PI)*summ
+		summ2=1/(2*PI)*summ2
+		write(1,'(I2,2ES48.38)') j,real(summ),real(summ2)
+		!if(j .NE. N_exp+2) write(2,'(2/)')
+		!write(2,*)
+>>>>>>> Trying to figure out why the part. no. op. is not working. A check using the onishi formula might be usefull. Printing results to visualize, will remove later.
 	end do
 >>>>>>> The test of pfaffian routines aswell as plots of their abs. error and runtimes have now been made. The error measure is not a very good one, will look into making it a relative one - right now the number doesn't say much. It would also be nice to run precision measurements on more realistic wavefunctions W.
 
@@ -589,5 +626,10 @@ program main
 =======
 >>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 	deallocate(nucleus)
+<<<<<<< 4a8e749bb2e5597a330efac1e9fb799123643e5d
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
+=======
+	close(unit=1)
+	close(unit=2)
+>>>>>>> Trying to figure out why the part. no. op. is not working. A check using the onishi formula might be usefull. Printing results to visualize, will remove later.
 end program main
