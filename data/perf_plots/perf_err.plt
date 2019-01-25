@@ -1,4 +1,6 @@
 # Plotting script for the performance benchmark of the Pfaffians
+# Plot by loading in gnuplot then typeset in pdflatex;
+# gnuplot load 'perf_err.plt' &&  pfdlatex perf_err && pdflatex perf_time
 
 reset
 
