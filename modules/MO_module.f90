@@ -2,6 +2,11 @@
 module MO_module 
 	!use print_module
 	implicit none
+<<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
+=======
+	integer, parameter :: dp = selected_real_kind(2*kind(1.0))
+	integer, parameter :: qp = selected_real_kind(33, 4931)
+>>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
 
 	type, public :: Nucleon
 		integer :: N

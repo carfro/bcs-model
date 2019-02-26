@@ -281,6 +281,7 @@ clean:
 !		write(*,*) 'Pfaffian : ',real(PF2P(1))*ten_quad**real(PF2P(2))
 !		write(*,*) 
 !        end do
+
 !-------Test-loop for the particle nbr op exp value
 
 	N_loop=3
@@ -305,8 +306,451 @@ clean:
 
 
 	write(*,*) summ
+<<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 =======
 >>>>>>> Last commit was uncomplete. Added libs and scrapbook containing old cod that might be useful
 =======
 >>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
+=======
+
+!-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
+
+	!DMAT=DMAT_CREATOR(0d0,N_tot)
+	!do i=1,7
+	!	call qpart_creator(nucleus,N,Z,scaleFactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	!	call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT)
+	!	call ONISHI_OVERLAP(on_ol,N_tot,U_N,U_N,V_N,V_N,DMAT,0d0)
+
+	!	write(*,*) 'Pairing strength scaled by : ',scaleFactor(i)
+	!	write(*,*) 'Pfaffian_olverlap : ', real(Pf2P_ol)
+	!	write(*,*) 'Onishi_olverlap : ', real(on_ol)
+	!	write(*,*) 
+        !end do
+!----------------- PROJECTOR TEST 1/2 -------------------------
+
+
+	DMAT=0
+	forall(i=1:cut) DMAT(i,i)=cmplx(1,0,16)
+	!write(*,*) shape(DMAT)
+	!write (fmt, '(A,I3,A)') '(', cut, 'F6.2)'
+
+	do j=N_exp,N_exp!N_exp-2,N_exp+2
+		write(*,*) j
+		summ=0
+		summ2=0
+		!do i=-1*N_loop,N_loop
+		do i=0,N_loop
+			write(*,*) i , i*dPhi
+
+			!phi_arg=i*dPhi*(0.5*N_exp+40)
+			!phi_arg=i*dPhi*(0.5*N_exp+0)
+			phi_arg=dPhi
+
+			!DMAT=DMAT_CREATOR(phi_arg,cut)
+			!DMAT=DMAT_CREATOR(i*dPhi*cut,cut)
+			!forall(i=1:cut) DMAT(i,i)=DMAT(i,i)*exp(cmplx(0,phi_arg,16))
+			if(i>0) DMAT=DMAT*exp(cmplx(0,phi_arg*N_exp,16))
+			write(*,*) DMAT(1,1)
+
+			!do k=1,cut
+			!	do l=1,cut
+			!		if((DMAT(k,l) .NE. 0) .AND. (DMAT(k,l) .NE. cmplx(0,i*dPhi,16))) then
+			!			write(*,*) DMAT(k,l)
+			!		end if
+			!	end do
+			!end do 
+
+			call ZSKPF10_OVERLAPP(Pf2P_ol,cut,U_test,U_test,V_test,V_test,DMAT,norm)
+
+			ext_ol=ext_pfaffian(cut,U_test,U_test,V_test,V_test,DMAT)
+
+			!DMAT=DMAT_CREATOR(i*dPhi,cut)
+			call ONISHI_OVERLAP(on_ol,cut,U_test,U_test,V_test,V_test,DMAT,phi_arg)
+
+			write(2,'(I4,F12.7,3E49.27E4)') i, i*dPhi, real(Pf2P_ol), real(on_ol), real(ext_ol)
+
+		!	summ= summ + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*Pf2P_ol
+		!	summ2= summ2 + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*exp(cmplx(0,1*dPhi*i*N_exp,16))
+		end do
+
+
+!-------- UV - checks -----------------	
+
+	TMATU=matmul(transpose(conjg(U_test)),U_test)+matmul(transpose(conjg(V_test)),V_test)
+	do k=1,cut
+		do l=1,cut
+			if((TMATU(k,l) /= 0)) write(*,*) TMATU(k,l),k,l 
+		end do
+	end do 
+
+	TMATU=matmul(U_test,transpose(conjg(U_test)))+matmul(conjg(V_test),transpose(V_test))
+	do k=1,cut
+		do l=1,cut
+			if((TMATU(k,l) /= 0)) write(*,*) TMATU(k,l),k,l 
+		end do
+	end do 
+
+!----------------------- 4/2 projector ---------------------------------------
+! There are some important parts here, just removed them in the real code to make it more readable...
+
+	cut=50
+
+	allocate(nucleus(N_tot,2),U_test(cut,cut),V_test(cut,cut),DMAT(cut,cut))
+	call nucleus_creator(N,Z,nucleus)
+	call qpart_creator(nucleus,N,Z,scaleFactor(2),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	open(unit=1,file='data/part_no_test.dat',status='replace')
+	open(unit=2,file='data/overlap_proj_test.dat',status='replace')
+	open(unit=3,file='data/det_test.dat',status='replace')
+
+	U_test=U_N(1:cut,1:cut)
+	V_test=V_N(1:cut,1:cut)
+
+	!norm=norm_fac(U_test,V_test,cut)
+	norm=prod_calc(V_test,cut)
+
+	!N_loop=2*30
+	N_loop=10*30*30
+	
+	N_op=24
+	N_exp=2*sum_check(V_test,cut)
+	!N_exp=24
+	write(*,*) 'sum_check 	', N_exp
+
+	!gillis loop: dPhi=12*PI/(cut*(2*N_loop+1))	
+	dPhi=8*4*PI/((cut+N_exp)*(N_loop))	
+	phi_arg=dPhi!*N_exp
+
+	DMAT=0
+	forall(i=1:cut) DMAT(i,i)=cmplx(1,0,16)
+
+	do j=N_exp,N_exp!N_exp-2,N_exp+2
+		write(*,*) j
+		summ=0
+		summ2=0
+		!$OMP PARALLEL DO PRIVATE(DMAT,Pf2P_ol,on_ol) SHARED(U_test,V_test,norm,phi_arg)
+		!gillis loop: do i=-1*N_loop,N_loop
+		do i=0,N_loop
+			!write(*,*) i!, i*dPhi
+
+			if(i>0) DMAT=DMAT*exp(cmplx(0,phi_arg,16))
+
+			call ZSKPF10_OVERLAPP(Pf2P_ol,cut,U_test,U_test,V_test,V_test,DMAT,norm)
+
+			!ext_ol=ext_pfaffian(cut,U_test,U_test,V_test,V_test,DMAT,norm)
+
+			!phi_arg2=dPhi
+			!if(i>0) DMAT2=DMAT2*exp(cmplx(0,phi_arg2,16))
+			call ONISHI_OVERLAP(on_ol,cut,U_test,U_test,V_test,V_test,DMAT,i*phi_arg)
+
+			write(2,'(I4,F12.7,3E49.27E4)') i, i*dPhi, real(Pf2P_ol), real(on_ol)!, real(ext_ol)
+
+		!	summ= summ + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*Pf2P_ol
+		!	summ2= summ2 + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*exp(cmplx(0,1*dPhi*i*N_exp,16))
+		end do
+		!summ=1/(2*PI)*summ
+		!write(1,'(I2,3ES48.38)') j,real(summ),real(summ2),real(summ3)
+		!if(j .NE. N_exp+2) write(2,'(2/)')
+		!write(2,*)
+	end do
+
+	deallocate(nucleus,U_test,V_test,DMAT)
+	close(unit=1)
+	close(unit=2)
+	close(unit=3)
+end program main
+
+
+! ---------------------------------------------------------------------------------------------------
+
+		WHERE(AIMAG(WDW)<0.) imag_unit = '-i*'
+		do l=1,2*cut
+			!write(6,'(100(F41.30,a,F41.30,2x))') (REAL(WDW(l,k)),imag_unit(l,k),ABS(AIMAG(WDW(l,k))),k=1,2*cut)
+			write(6,'(100(g23.15,a,g23.15,2x))') (trim(REAL(WDW(l,k))),imag_unit(l,k),ABS(AIMAG(WDW(l,k))),k=1,2*cut)
+		end do 	
+		write(6,*) 
+
+! ---------------------------------------------------------------------------------------------------
+
+		allocate(lam_vector(step),lam_vector_old(step))
+		lam_vector=linspace( lower_energy(nucleus(:,1),N),&
+			higher_energy(nucleus(:,1),N),step)
+
+		DO i=1,step
+			write(1,*) i
+
+			siz = size(lam_vector,1)
+			midP=ceiling(siz/2d0)
+			!allocate(lam_vector_old(siz))
+			!lam_vector_old=lam_vector(1:siz)
+
+			lam_sN=lam_vector(midP)
+			!write(*,*) 'midP 	lam_sN'
+			!write(*,*) midP,lam_sN
+			write(1,*) 'lam_vector(1) 	',lam_vector(1)
+			write(1,*) 'lam_vector(siz) 	',lam_vector(siz)
+			!write(*,*) lam_vector
+
+			EV_N = analytic_EV(nucleus(:,1),deltaR,lam_sN,N)
+			Vsum=sum(EV_N(:,2),1)
+
+			write(1,*) 'Vsum' , Vsum
+
+			if (abs(Vsum-N)<tol) then
+				write(*,*) 'proper exit'
+			       	exit 
+			else if (Vsum>N) then
+				if(midP==1) exit
+				!write(*,*) 'below'
+				!deallocate(lam_vector)
+				!allocate(lam_vector(midP-1))
+				!lam_vector=lam_vector_old(1:midP-1)	       
+				lam_vector=linspace(lam_vector(1),&
+				lam_vector(midP),step)
+				!deallocate(lam_vector_old)
+			else
+				if(midP==siz) exit
+				!write(*,*) 'above',lam_vector(midP+1)
+				!write(*,*) lam_vector(midP+5)
+				!deallocate(lam_vector)
+				!allocate(lam_vector(siz-midP))
+				!lam_vector=lam_vector_old(midP+1:siz)
+				lam_vector_old=linspace(lam_vector(midP),&
+				lam_vector(size(lam_vector,1)),step)
+				lam_vector=lam_vector_old				
+				!write(*,*) lam_vector(2)
+				!deallocate(lam_vector_old)
+			end if
+		if(allocated(lam_vector)) deallocate(lam_vector)
+		if(allocated(lam_vector_old)) deallocate(lam_vector_old)
+
+		allocate(lam_vector(step))
+		lam_vector=linspace( lower_energy(nucleus(:,2),z),&
+			higher_energy(nucleus(:,2),z),step)
+
+		do i=1,step
+			siz = size(lam_vector,1)
+			midp=ceiling(siz/2d0)
+			allocate(lam_vector_old(siz))
+			lam_vector_old=lam_vector(1:siz)
+			lam_sz=lam_vector(midp)
+
+			ev_z = analytic_ev(nucleus(:,2),deltar,lam_sz,z)
+			vsum=sum(ev_z(:,2),1)
+
+			if (abs(vsum-z)<tol) then
+			       	exit 
+			else if (vsum>z) then
+				if(midp==1) exit
+				deallocate(lam_vector)
+				allocate(lam_vector(midp-1))
+				lam_vector=lam_vector_old(1:midp-1)	       
+				deallocate(lam_vector_old)
+			else
+				if(midp==siz) exit
+				deallocate(lam_vector)
+				allocate(lam_vector(siz-midp))
+				lam_vector=lam_vector_old(midp+1:siz)
+				deallocate(lam_vector_old)
+			end if
+		
+
+
+
+!-------------------------13/2 Test-loop for the particle nbr op exp value ----------------------------------
+
+	allocate(nucleus(cut,2),U_N(cut,cut),V_N(cut,cut),U_Z(cut,cut),V_Z(cut,cut),DMAT(cut,cut),WDW(2*cut,2*cut))
+
+	call nucleus_creator(N,Z,cut,nucleus)
+	call qpart_creator(nucleus,N,Z,cut,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+! 	overlap testing files
+	open(unit=2,file='data/part_no/overlap_proj_test.dat',status='replace')
+	open(unit=9,file='data/part_no/overlap_real.dat',status='replace')
+	open(unit=10,file='data/part_no/overlap_imag.dat',status='replace')
+! 	det test
+	open(unit=3,file='data/part_no/det_test.dat',status='replace')
+! 	U,V matrices
+	open(unit=4,file='matlab/U_mat.dat',status='replace')
+	open(unit=5,file='matlab/V_mat.dat',status='replace')
+! 	W matrices
+	open(unit=6,file='matlab/W_r_mat.dat',status='replace')
+	open(unit=7,file='matlab/W_i_mat.dat',status='replace')
+	!open(unit=7,file='data/X_mat.dat',status='replace')
+	open(unit=8,file='matlab/W_mat.dat',status='replace')
+
+	do l=1,cut
+		write(4,'(100F41.30)') (real(U_N(l,k)),k=1,cut)
+	end do 	
+	do l=1,cut
+		write(5,'(100F41.30)') (real(V_N(l,k)),k=1,cut)
+	end do 	
+
+	norm=prod_calc(V_N,cut)
+	write(*,*) 'norm 	', norm
+
+	N_loop=5*30*30
+	
+	N_exp=2*sum_check(V_N,cut)
+	write(*,*) 'sum_check 	', N_exp
+
+	dPhi=4*4*PI/((cut+N_exp)*(N_loop))	
+	phi_arg=dPhi!*N_exp
+
+	!DMAT=0
+	!forall(i=1:cut) DMAT(i,i)=cmplx(1,0,16)
+
+	!!$OMP PARALLEL DO PRIVATE(DMAT,Pf2P_ol,on_ol) SHARED(U_test,V_test,norm,phi_arg)
+	!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(norm,phi_arg)
+	!do i=0.25*N_loop,0.25*N_loop
+	do i=0,N_loop
+		write(*,*) i!, i*dPhi
+
+		if(i>0) DMAT=DMAT*exp(cmplx(0,i*phi_arg,16))
+		!if(i>0) DMAT=DMAT*exp(cmplx(0,phi_arg,16))
+
+		!U_test=U_N(1:cut,1:cut)
+		!V_test=V_N(1:cut,1:cut)
+
+		WDW=WD(U_N,U_N,V_N,V_N,DMAT,cut)
+		!WHERE(AIMAG(WDW)<0.) imag_unit = '-'
+		!WHERE(AIMAG(WDW)<0.) imag_unit = '-i*'
+
+		!do l=1,2*cut
+		!	!write(8,'(100(g23.15,a,g23.15,a))') (REAL(WDW(l,k)),imag_unit(l,k),ABS(AIMAG(WDW(l,k))),',',k=1,2*cut)
+		!	!write(8,'(100(g23.15,a,g23.15,a))') (REAL(WDW(l,k)),imag_unit(l,k),ABS(AIMAG(WDW(l,k))),'i,',k=1,2*cut)
+		!	write(6,'(100(F23.15))') (REAL(WDW(l,k)),k=1,2*cut)
+		!	write(7,'(100(F23.15))') (AIMAG(WDW(l,k)),k=1,2*cut)
+		!end do 	
+		!write(6,*); write(7,*); write(8,*) 
+
+		!call ZSKPF10_OLPP(Pf2P_ol,cut,U_test,U_test,V_test,V_test,DMAT,norm)
+		call ZSKPF10_MOLP(Pf2P_ol,cut,WDW,norm)
+
+		ext_ol=ext_pfaffian(cut,U_N,U_N,V_N,V_N,DMAT,norm)
+		
+		!U_test=U_N(1:cut,1:cut)
+		!V_test=V_N(1:cut,1:cut)
+
+		!phi_arg2=dPhi
+		!if(i>0) DMAT2=DMAT2*exp(cmplx(0,phi_arg2,16))
+		call ONISHI_OVERLAP(on_ol,cut,U_N,U_N,V_N,V_N,DMAT,i*phi_arg)
+
+		write(2,'(I6,F12.7,3E52.35E6)') i, i*dPhi, abs(Pf2P_ol), abs(on_ol), abs(ext_ol)
+		write(9,'(I6,F12.7,3E52.35E6)') i, i*dPhi, real(Pf2P_ol), real(on_ol), real(ext_ol)
+		write(10,'(I6,F12.7,3E52.35E6)') i, i*dPhi, aimag(Pf2P_ol), aimag(on_ol), aimag(ext_ol)
+	end do
+	!$OMP END PARALLEL DO
+
+
+
+
+!------------------------------------- LOOOP CLEAN-UP 20/2 ----------------------------------
+!------------------------- Test-loop for the particle nbr op exp value ----------------------------------
+
+	allocate(nucleus(cut,2),U_N(cut,cut),V_N(cut,cut),U_Z(cut,cut),&
+		V_Z(cut,cut),DMAT(cut,cut),WDW(2*cut,2*cut),EYE(cut,cut))
+
+	call nucleus_creator(N,Z,cut,nucleus)
+	call qpart_creator(nucleus,N,Z,cut,scaleFactor(1),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+
+! 	overlap testing files
+	open(unit=2,file='data/part_no/overlap_proj_test.dat',status='replace')
+	open(unit=9,file='data/part_no/overlap_real.dat',status='replace')
+	open(unit=10,file='data/part_no/overlap_imag.dat',status='replace')
+	open(unit=11,file='data/part_no/sum.dat',status='replace')
+
+! 	det test
+	!open(unit=3,file='data/part_no/det_test.dat',status='replace')
+
+! 	U,V matrices
+	!open(unit=4,file='matlab/U_mat.dat',status='replace')
+	!open(unit=5,file='matlab/V_mat.dat',status='replace')
+	!do l=1,cut
+	!	write(4,'(100F41.30)') (real(U_N(l,k)),k=1,cut)
+	!end do 	
+	!do l=1,cut
+	!	write(5,'(100F41.30)') (real(V_N(l,k)),k=1,cut)
+	!end do 	
+
+	norm=prod_calc(V_N,cut)
+	write(*,*) 'norm 	', norm
+
+	N_loop=10!*20 	!5*30*30
+	allocate(Vsumm(N_loop),Vsumm2(N_loop),Vsumm3(N_loop))
+	
+	N_exp=2*sum_check(V_N,cut)
+	write(*,*) 'sum_check 	', N_exp
+
+	!dPhi=4*4*PI/((cut+N_exp)*(2*N_loop+1))	
+	dPhi=2*PI/(2*N_loop+1)	
+	!phi_arg=dPhi!*N_exp
+
+	WDW=0
+	DMAT=0
+	EYE=0
+
+	Pf2P_ol=0
+	ext_ol=0
+	on_ol=0
+
+	forall(i=1:cut) EYE(i,i)=cmplx(1,0,16)
+
+	do j=ceiling(N_exp)-6,ceiling(N_exp)+6
+		write(*,*) j
+		Vsumm=0
+		Vsumm2=0
+		Vsumm3=0
+
+		!!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(DMAT,EYE,U_N,V_N,norm,N_loop,phi_arg)
+		!do i=0.25*N_loop,0.25*N_loop
+		do i=-1*N_loop,N_loop
+			!write(*,*) i!, i*dPhi
+
+			DMAT=EYE*exp(cmplx(0,i*dPhi,16))
+			!if(i>0) DMAT=DMAT*exp(cmplx(0,dPhi,16))
+
+			WDW=WD(U_N,U_N,V_N,V_N,DMAT,cut)
+
+			call ZSKPF10_MOLP(Pf2P_ol,cut,WDW,norm)
+			!call ZSKPF10_OLP(Pf2P_ol,N,U_N,U_N,V_N,V_N,DMAT,norm)
+
+			ext_ol=ext_pfaffian(cut,U_N,U_N,V_N,V_N,DMAT,norm)
+			
+			call ONISHI_OVERLAP(on_ol,cut,U_N,U_N,V_N,V_N,DMAT,i*dPhi)
+
+			!write(2,'(I6,F12.7,3E52.35E6)') i, i*dPhi, abs(Pf2P_ol), abs(on_ol), abs(ext_ol)
+			!write(9,'(I6,F12.7,3E52.35E6)') i, i*dPhi, real(Pf2P_ol), real(on_ol), real(ext_ol)
+			!write(10,'(I6,F12.7,3E52.35E6)') i, i*dPhi, aimag(Pf2P_ol), aimag(on_ol), aimag(ext_ol)
+
+			Vsumm(i+N_loop+1) 	= 	dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*Pf2P_ol
+			Vsumm2(i+N_loop+1) 	= 	dPhi*exp(cmplx(0,-1*i*dPhi*j*0.5,16))*on_ol
+			!Vsumm3(i+N_loop+1) = 	dPhi*exp(cmplx(0,-1*i*dPhi*j*0.5,16))*on_ol
+			y(i+N_loop+1) 		= 	Vsumm(i+N_loop+1) 	
+			y2(i+N_loop+1) 		= 	Vsumm2(i+N_loop+1) 	
+		end do
+		!!$OMP END PARALLEL DO
+
+		summ = 1/(2*PI)*sum(Vsumm)	
+		summ2 = 1/(2*PI)*sum(Vsumm2)
+		!summ3 = 1/(2*N_loop+1)*sum(Vsumm3)
+ 		y=y*1/(summ)
+ 		y2=y2*1/(summ2)
+ 		
+
+		write(11,'(I6,5E52.35E6)') j, abs(summ),abs(summ2),abs(summ3)
+		if(aimag(summ) > 0) write(*,*) summ
+		write(*,*) 'done'
+	end do
+
+ 	deallocate(nucleus,U_N,V_N,U_Z,V_Z,DMAT,WDW,EYE)
+	close(unit=2)
+	close(unit=3)
+
+
+
+
+
+
+
+
+>>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.

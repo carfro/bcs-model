@@ -1,7 +1,11 @@
 module analytic_module
 	use MO_module
 	implicit none
+<<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
 	integer, parameter :: dp=selected_real_kind(2*kind(1.0))
+=======
+	integer, parameter :: N_tot=330
+>>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
 contains
 	function analytic_EV(nucleons,delta,lam,NN) result(EV)
 		type(Nucleon),dimension(:), intent(in) :: nucleons
