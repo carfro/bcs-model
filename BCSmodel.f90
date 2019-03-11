@@ -4,13 +4,30 @@ module BCS
 	use pfaffian_module
 	USE F95_PFAPACK
 	implicit none
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	integer, parameter :: N_tot=330
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	!integer, parameter :: N_tot=330
+>>>>>>> hola
 	real(8), parameter :: PI=4.D0*DATAN(1.D0)
 	real(kind=qp), parameter :: ten_quad = 10.
 
 contains
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+=======
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+	integer, parameter :: N_tot=330
+	real(8), parameter :: PI=4.D0*DATAN(1.D0)
+	real(kind=qp), parameter :: ten_quad = 10.
+
+contains
+>>>>>>> hola
 ! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
 ! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
 	Subroutine qpart_creator(nucleus,N,Z,scalefactor,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
@@ -125,7 +142,10 @@ contains
 	END FUNCTION WTW
 
 	SUBROUTINE ZSKPF10_OVERLAPP(Pf2P_out,N,UD,UM,VD,VM,DMAT,get_norm) 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 <<<<<<< 4a8e749bb2e5597a330efac1e9fb799123643e5d
+=======
+>>>>>>> hola
 		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
 		implicit none
 
@@ -150,6 +170,10 @@ contains
 		WTW((N+1):(2*N),1:N) = -matmul(transpose(conjg(VD)),matmul(transpose(DMAT),VM))
 		WTW(1:N,(N+1):2*N) = matmul(transpose(VM),matmul(DMAT,conjg(VD)))
 		WTW((N+1):(2*N),(N+1):(2*N)) = matmul(transpose(conjg(UD)),conjg(VD))
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+<<<<<<< HEAD
+>>>>>>> hola
 
 		call ZSKPF10_F95(WTW,Pf2P) 
 		Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(norm)
@@ -172,11 +196,45 @@ contains
 		z_no = cmplx(0,phi,16)
 		DMAT=0
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+=======
+
+		call ZSKPF10_F95(WTW,Pf2P) 
+		Pf2P_out=S_n*real(PF2P(1))*ten_quad**real(PF2P(2))/(norm)
+
+	END SUBROUTINE ZSKPF10_OVERLAPP
+
+	
+	FUNCTION DMAT_CREATOR(phi,N) result(DMAT)
+		! computes the overlap of two wave functions \bra{UM,VM} DMAT \ket{UD,VD}   with ZSKPFA from PFAPACK,
+		implicit none
+
+		integer, intent(in):: N
+		real(dp), intent(in) :: phi
+		
+		COMPLEX(dp), dimension(N,N) :: DMAT
+
+		COMPLEX(dp) :: z_no
+		integer :: i
+
+		z_no = cmplx(0,phi,16)
+		DMAT=0
+
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 		do i=1,N
 			DMAT(i,i) = exp(z_no)
 		end do 
 
 	END FUNCTION DMAT_CREATOR
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+<<<<<<< HEAD
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 	
 =======
 =======
@@ -352,6 +410,7 @@ program main
 	implicit none
 ! 	Nucleus, filled using MO_module
 	type(Nucleon), dimension(:,:), allocatable :: nucleus
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 ! 	Variables used for analytic solution
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 <<<<<<< 56f1d0abafcb13c8470f19f2d610ccb98fef0fc6
@@ -374,6 +433,15 @@ program main
 	! Nbr of neutrons/protons and loop integer(s),
 	integer :: i,j,N_loop
 	integer :: N,Z
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+! 	Matrices used for analytic solution, and particle projection
+	COMPLEX(kind=dp) :: 	U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
+				U_Z(N_tot,N_tot),V_Z(N_tot,N_tot),&
+				DMAT(N_tot,N_tot),&
+				WW_N(2*N_tot,2*N_tot), WW_D(2*N_tot,2*N_tot)
+>>>>>>> hola
 
 	N=24		! Number of NEUTRONS to find
 	Z=24 		! Number of PROTONS to find
@@ -387,6 +455,7 @@ program main
 
 !-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	!DMAT=DMAT_CREATOR(0d0,N_tot)
 	!do i=1,7
 	!	call qpart_creator(nucleus,N,Z,scaleFactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
@@ -438,11 +507,21 @@ program main
 =======
 	COMPLEX(dp) :: 	Pf2P(2),Pf2P_ol,&
 >>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
+=======
+	COMPLEX(kind=dp), dimension(:,:), allocatable :: 	U_test,V_test
+	REAL(kind=dp), dimension(:,:), allocatable    :: 	EV_N,EV_Z
+=======
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+! 	Variables used for analytic solution
+	COMPLEX(dp) :: 	Pf2P(2),Pf2P_ol,&
+>>>>>>> hola
 			U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
 			U_Z(N_tot,N_tot),V_Z(N_tot,N_tot),&
 			DMAT(N_tot,N_tot),&
 		       	WW_N(2*N_tot,2*N_tot), WW_D(2*N_tot,2*N_tot)
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	COMPLEX(kind=qp) :: prod_N,prod_Z,summ
 	!REAL(dp) 	:: Pf2P_out
 =======
@@ -450,11 +529,28 @@ program main
 
 
 	REAL(kind=dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
+=======
+	COMPLEX(kind=qp) :: prod_N,prod_Z,summ,summ2
+	REAL(kind=qp) 	:: norm
+
+
+	REAL(kind=dp) 	:: scaleFactor(7),dPhi,S_n,N_exp,N_op
+<<<<<<< HEAD
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 
 
 	! Nbr of neutrons/protons and loop integer(s),
 	integer :: i,j,N_loop
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	integer :: N,Z
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	integer :: N,Z,cut,step
+>>>>>>> hola
 
 	N=24		! Number of NEUTRONS to find
 	Z=24 		! Number of PROTONS to find
@@ -613,6 +709,7 @@ program main
 	end do
 >>>>>>> The test of pfaffian routines aswell as plots of their abs. error and runtimes have now been made. The error measure is not a very good one, will look into making it a relative one - right now the number doesn't say much. It would also be nice to run precision measurements on more realistic wavefunctions W.
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 	deallocate(nucleus)
 	close(unit=1)
@@ -632,4 +729,110 @@ program main
 	close(unit=1)
 	close(unit=2)
 >>>>>>> Trying to figure out why the part. no. op. is not working. A check using the onishi formula might be usefull. Printing results to visualize, will remove later.
+=======
+	deallocate(nucleus,EV_N,EV_Z)
+	close(unit=3)
+=======
+	integer :: N,Z
+
+	N=24		! Number of NEUTRONS to find
+	Z=24 		! Number of PROTONS to find
+	
+	scaleFactor = (/0.5d0,0.75d0,1.d0,1.75d0,2.5d0,3d0,4d0/)
+
+!-------Analytical solution using BCS-equations
+	allocate(nucleus(N_tot,2))
+
+	call nucleus_creator(N,Z,nucleus)
+
+!-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
+
+	!DMAT=DMAT_CREATOR(0d0,N_tot)
+	!do i=1,7
+	!	call qpart_creator(nucleus,N,Z,scaleFactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	!	call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT)
+	!	write(*,*) 'Pairing strength scaled by : ',scaleFactor(i)
+	!	write(*,*) 'Pfaffian_olverlap : ', real(Pf2P_ol)
+	!	write(*,*) 
+        !end do
+
+!-------Test-loop for the particle nbr op exp value
+
+	call qpart_creator(nucleus,N,Z,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	open(unit=1,file='data/part_no_test.dat',status='replace')
+	open(unit=2,file='data/phase_proj_test.dat',status='replace')
+	
+	norm=norm_fac(U_N,V_N,N_tot)
+
+	N_loop=8*24
+	dPhi=2*PI/(2*N_loop+1)	
+
+	N_op=24
+	N_exp=24
+
+=======
+	integer :: N,Z
+
+	N=24		! Number of NEUTRONS to find
+	Z=24 		! Number of PROTONS to find
+	
+	scaleFactor = (/0.5d0,0.75d0,1.d0,1.75d0,2.5d0,3d0,4d0/)
+
+!-------Analytical solution using BCS-equations
+	allocate(nucleus(N_tot,2))
+
+	call nucleus_creator(N,Z,nucleus)
+
+!-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
+
+	!DMAT=DMAT_CREATOR(0d0,N_tot)
+	!do i=1,7
+	!	call qpart_creator(nucleus,N,Z,scaleFactor(i),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	!	call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT)
+	!	write(*,*) 'Pairing strength scaled by : ',scaleFactor(i)
+	!	write(*,*) 'Pfaffian_olverlap : ', real(Pf2P_ol)
+	!	write(*,*) 
+        !end do
+
+!-------Test-loop for the particle nbr op exp value
+
+	call qpart_creator(nucleus,N,Z,1d0,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+	open(unit=1,file='data/part_no_test.dat',status='replace')
+	open(unit=2,file='data/phase_proj_test.dat',status='replace')
+	
+	norm=norm_fac(U_N,V_N,N_tot)
+
+	N_loop=8*24
+	dPhi=2*PI/(2*N_loop+1)	
+
+	N_op=24
+	N_exp=24
+
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+	do j=N_exp,N_exp!N_exp-2,N_exp+2
+		write(*,*) j
+		summ=0
+		summ2=0
+		do i=-1*N_loop,N_loop
+			DMAT=DMAT_CREATOR(1*i*dPhi,N_tot)
+			call ZSKPF10_OVERLAPP(Pf2P_ol,N_tot,U_N,U_N,V_N,V_N,DMAT,norm)
+			write(2,'(I4,2ES48.38)') i,i*dPhi, real(Pf2P_ol)**2
+			summ= summ + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*Pf2P_ol
+			summ2= summ2 + dPhi*exp(cmplx(0,-1*i*dPhi*j,16))*exp(cmplx(0,1*dPhi*i*N_exp,16))
+		end do
+		summ=1/(2*PI)*summ
+		summ2=1/(2*PI)*summ2
+		write(1,'(I2,2ES48.38)') j,real(summ),real(summ2)
+		!if(j .NE. N_exp+2) write(2,'(2/)')
+		!write(2,*)
+	end do
+
+	deallocate(nucleus)
+	close(unit=1)
+	close(unit=2)
+<<<<<<< HEAD
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 end program main

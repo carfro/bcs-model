@@ -281,7 +281,13 @@ clean:
 !		write(*,*) 'Pfaffian : ',real(PF2P(1))*ten_quad**real(PF2P(2))
 !		write(*,*) 
 !        end do
+<<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
 !-------Test-loop for the particle nbr op exp value
 
 	N_loop=3
@@ -306,6 +312,7 @@ clean:
 
 
 	write(*,*) summ
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 <<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9
 =======
@@ -313,6 +320,10 @@ clean:
 =======
 >>>>>>> The pfaffian performance test is now finished. Currently in the process of creating particle nbr projector
 =======
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> hola
 
 !-------Test-loop for the overlapp pfaffian, should be =1 for U=U', V='V, DMAT=1
 
@@ -753,4 +764,11 @@ end program main
 
 
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 >>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
+=======
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola

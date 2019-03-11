@@ -3,9 +3,23 @@ module BCS
 	use analytic_module
 	use pfaffian_module
 	implicit none
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	integer, parameter :: N_tot=330
 	real(kind=qp), parameter :: ten_quad = 10.
 contains
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	!integer, parameter :: N_tot=330
+	!real(kind=qp), parameter :: ten_quad = 10._qp
+contains
+=======
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+	integer, parameter :: N_tot=330
+	real(kind=qp), parameter :: ten_quad = 10.
+contains
+>>>>>>> hola
 ! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
 ! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
 	Subroutine qpart_creator(nucleus,N,Z,scalefactor,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
@@ -52,6 +66,13 @@ contains
 			end if
 		end do
 	END Subroutine qpart_creator
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+<<<<<<< HEAD
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 
 	FUNCTION prod_calc(V,N) result(prod)
 		complex(dp)	:: V(N,N) 
@@ -116,9 +137,27 @@ program main
 !-------Analytical solution using BCS-equations
 	allocate(nucleus(N_tot,2))
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 	call nucleus_creator(N,Z,nucleus)
 
 	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	call nucleus_creator(N,Z,N_tot,nucleus)
+
+	call qpart_creator(nucleus,N,Z,N_tot,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+=======
+	call nucleus_creator(N,Z,nucleus)
+
+	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+	call nucleus_creator(N,Z,nucleus)
+
+	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 	
 !-------Test-loop for the pfaffians below	
 
@@ -148,7 +187,19 @@ program main
 
 		factor=1
 		call cpu_time(t1)
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+		Pf=overlap_pfaffian(N_mult,N_mult,&
+=======
+		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 			N_mult,U_test,U_test,V_test,V_test)
 		call cpu_time(t2)
 		call ZSKPF10_F95(WW_N,Pf2P) 

@@ -10,6 +10,7 @@
 <<<<<<< f8ecfa0a313073c6540362884910bffeee3ffa04
 <<<<<<< ed64cb91f3bfcf01ea739c71ab7d2bf93469f696
 FC=ifort
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 <<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
 FFLAGS= -g -check all -fp-stack-check -heap-arrays 
 =======
@@ -17,6 +18,19 @@ FFLAGS=-g -check all -fp-stack-check -heap-arrays
 #FC=gfortran
 #FFLAGS=-fcheck=all
 >>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+FFLAGS=-g -check all -fp-stack-check -heap-arrays 
+#FC=gfortran
+#FFLAGS=-fcheck=all
+=======
+FFLAGS= -g -check all -fp-stack-check -heap-arrays 
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+FFLAGS= -g -check all -fp-stack-check -heap-arrays 
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 ##         Intel's math kernel library, for LINUX
 #LIBS= -L/opt/intel/Compiler/11.0/069/mkl/lib/em64t/ 
 #LIBS= -llapack -lblas 
@@ -107,11 +121,23 @@ MAIN=$(wildcard *.f90)
 all: $(MAIN)
 	
 $(MAIN):$(OBJECTS) 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
 <<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
 	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack
 =======
 	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack 
 >>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack 
+=======
+	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+	$(FC) $(FFLAGS) $(PFAFLAGS) $(MFLAG) -o $(patsubst %.f90,%,$@) $? $@ $(LIBS) -lpfapack
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 %.o: %.f90
 	$(FC) $(FFLAGS) $(LIBS) $(MFLAG) -c $<  -o $@
 <<<<<<< 39081309af0c5314a057e32da0b2ba81764cc1d9

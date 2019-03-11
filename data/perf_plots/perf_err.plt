@@ -42,11 +42,26 @@ set format x '{\small$%g$}'
 set format y '{\small$10^{%T}$}'
 set mytics 10
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 #array Titles[3]
 #Titles[1] = "Pfaffian$_{G-C,Robledo,Bertsch}"
 #Titles[2] = "Pfaffian$_{Wimmer;Parlett-Reid}"
 #Titles[3] = "Pfaffian$_{Wimmer;Housholder}"
 
+<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
+=======
+<<<<<<< HEAD
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+=======
+>>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
+>>>>>>> hola
 set key autotitle columnhead
 plot for [i=3:5] 'performance_err.dat' u 1:i  
 #plot for [i=3:5] 'performance_err.dat' u 1:i  title "Pf$_{".(i-2)."}$"
