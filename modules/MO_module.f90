@@ -1,12 +1,9 @@
 ! Nucleon class, w/ attributes N:principal qntmnbr, l:angular mom, j:tot ang mom l±s, ome:(m_J) z-axis projection,
 module MO_module 
-	!use print_module
 	implicit none
-<<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
-=======
 	integer, parameter :: dp = selected_real_kind(2*kind(1.0))
 	integer, parameter :: qp = selected_real_kind(33, 4931)
->>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
+	real(kind=qp), parameter :: ten_quad = 10._qp
 
 	type, public :: Nucleon
 		integer :: N
@@ -18,7 +15,7 @@ module MO_module
 		real :: E
 	end type Nucleon
 
-	public :: nucleus_creator
+	public nucleus_creator
 contains
 	! quicksort - https://gist.github.com/1AdAstra1/6f7785373efe5bb6c254d2e20c78ccc4
 	! could be made more general by passing comp-function
@@ -45,7 +42,6 @@ contains
 				j=j-1
 			end do
 			if (i >= j) exit
-			!if(a(i)%ome<a(j)%ome .and.  a(i)%E==a(j)%E) exit
 			t = a(i);  a(i) = a(j);  a(j) = t
 			i=i+1
 			j=j-1
@@ -110,17 +106,12 @@ contains
 		if(nucl%q==0) then
 			k=kappa(nucl%N+1,1)
 			u=mu(nucl%N+1,1)
-			!write(*,*) 'NEUTRON', char(9) ,'N= ',nucl%N, 'kappa= ',k,'mu= ',u
 		else
 			k=kappa(nucl%N+1,2)
 			u=mu(nucl%N+1,2)
-			!write(*,*) 'PROTON', char(9) ,'N= ',nucl%N, 'kappa= ',k,'mu= ',u
 		end if
 
 		hw = hbar_omega(N,Z,nucl%q)
-
-		!call hbar_omega(N,Z,nucl%q,hw) ! Diff h_bar*\omega for neutrons and protons
-		!hw=41*(N+Z)**(-1/3) 		! Same h_bar*\omega for neutrons and protons
 
 		if(nucl%s>0) then
 			E= hw*( nucl%N +3/2-k*nucl%l-k*u*(nucl%l*(nucl%l+1)-nucl%N*(nucl%N+3)/2) )
@@ -148,12 +139,12 @@ contains
 	end function hbar_omega
 
 	! Returns list of quantum numbers (Plist:list of particles, see module/class below) for (input) A 'nucleons'
-	subroutine qntm_nbrs(n,z,qCh,Nlist)
+	subroutine qntm_nbrs(n,z,lvls,qCh,Nlist)
 		!use modified_oscillator
 		implicit none
 
 		integer, intent(in) :: n,z,qCh
-		type(Nucleon), dimension(qCh*330+(1-qCh)*330), intent(out) :: Nlist
+		type(Nucleon), dimension(qCh*lvls+(1-qCh)*lvls), intent(out) :: Nlist
 
 		integer :: rem 		! Remaining nucleons to assign
 		integer :: ncur 	! Current N under assignment
@@ -164,10 +155,11 @@ contains
 		integer :: omeCur 	! \Omega currently under assignment
 		integer :: i 		! Counter, tracks current nucleon: Nlist(i)
 		integer :: n_0,z_0 	! N=8 => z=330,n=330
+		integer :: lvls 	! nbr of orbitals/levels to use
 		real :: Ener 		! Energy currently under assignment
 
-		n_0=330
-		z_0=330
+		n_0=lvls
+		z_0=lvls
 		ndeg = 0
 		ncur = -1
 		i = 1
@@ -269,31 +261,30 @@ contains
 	end subroutine qntm_nbrs
 
 	! Does N and Z
-	subroutine nucleus_creator(N,Z,nucl)
+	subroutine nucleus_creator(N,Z,lvls,nucl)
 		implicit none
 		integer, parameter :: N_tot=330
-		integer, intent(in) :: N,Z
-		type(Nucleon), dimension(N_tot,2), intent(out) :: nucl
+		integer, intent(in) :: N,Z,lvls
+		type(Nucleon), dimension(lvls,2), intent(out) :: nucl
 		integer :: i,j
 
 ! 		Create the nucleus using N,Z from input
-		call qntm_nbrs(N,Z,+1,nucl(:,2))
-		call qntm_nbrs(N,Z,0,nucl(:,1))
-
+		call qntm_nbrs(N,Z,lvls,+1,nucl(:,2))
+		call qntm_nbrs(N,Z,lvls,0,nucl(:,1))
 ! 		Sort the total nucleus of N=8 (i.e. n,z = 330)
-		call quicksort_energy(nucl(:,1),1,N_tot)
-		call quicksort_energy(nucl(:,2),1,N_tot)
+		call quicksort_energy(nucl(:,1),1,lvls)
+		call quicksort_energy(nucl(:,2),1,lvls)
 		i=1
-		do while(i<=N_tot)
+		do while(i<=lvls)
 				j=i+nucl(i,1)%j
-				if(j > N_tot) j=N_tot
+				if(j > lvls) j=lvls
 				call quicksort_ome(nucl(:,1),i,j)
 				i=j+1
 		end do
 		i=1
-		do while(i<=N_tot)
+		do while(i<=lvls)
 				j=i+nucl(i,2)%j
-				if(j > N_tot) j=N_tot
+				if(j > lvls) j=lvls
 				call quicksort_ome(nucl(:,2),i,j)
 				i=j+1
 		end do
@@ -388,45 +379,6 @@ contains
 		end do
 		close(4)
 	end function nucleus_extractor	
-
-!     Auxiliary routine: printing a matrix.
-!
-	subroutine PRINT_MATRIX( DESC, M, N, A, LDA )
-	      CHARACTER*(*)    DESC
-	      INTEGER          M, N, LDA
-	      COMPLEX*16          A( LDA, * )
-	
-	      INTEGER          I, J
-	
-	      WRITE(*,*)
-	      WRITE(*,*) DESC
-	      DO I = 1, M
-		 WRITE(*,9998) ( A( I, J ), J = 1, N )
-	      END DO
-	
-	 9998 FORMAT( 11(:,1X,'(',F6.2,',',F6.2,')') )
-	      RETURN
-	end subroutine PRINT_MATRIX
-
-!
-!     Auxiliary routine: printing a real matrix.
-!
-	subroutine PRINT_RMATRIX( DESC, M, N, A, LDA )
-	      CHARACTER*(*)    DESC
-	      INTEGER          M, N, LDA
-	      REAL(8)             A( LDA, * )
-	
-	      INTEGER          I, J
-	
-	      WRITE(*,*)
-	      WRITE(*,*) DESC
-	      DO I = 1, M
-		 WRITE(*,9998) ( A( I, J ), J = 1, N )
-	      END DO
-	
-	 9998 FORMAT( 11(:,1X,F6.2) )
-	      RETURN
-	end subroutine PRINT_RMATRIX  
 
 ! 	Auxiliary routine: Prints the nucleus 
 

@@ -1,150 +1,84 @@
 module analytic_module
 	use MO_module
 	implicit none
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-<<<<<<< 518b4546ef84f0da8a6b6b6dbe2aaec7b0d3de15
-	integer, parameter :: dp=selected_real_kind(2*kind(1.0))
-=======
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> hola
 	integer, parameter :: N_tot=330
->>>>>>> Moved matrix routines to module mroutines. Working on the expectation value of particle nbr op.
 contains
-	function analytic_EV(nucleons,delta,lam,NN) result(EV)
-		type(Nucleon),dimension(:), intent(in) :: nucleons
-		real(dp), intent(in) :: delta,lam
-		integer,intent(in) :: NN
-		real(dp)  :: summ
-		real(dp), dimension(size(nucleons,1),2) :: EV
-		integer :: i
+! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
+! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
+	Subroutine qpart_creator(nucleus,N,Z,lvls,del_pairing,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
 
-		if(delta==0._dp) then
-			summ=0
-			i=1
-			do while(summ<NN)
-				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
-				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
+		type(Nucleon), dimension(:,:),intent(in) 	:: nucleus
+		real(dp),intent(in)				:: del_pairing
+		integer,intent(in) 				:: N,Z,lvls
 
-				summ=summ+EV(i,2)
-				i=i+1
-			end do
-			EV(i:size(nucleons,1),1)=0
-			EV(i:size(nucleons,1),2)=0
-		else
-			do i=1,size(nucleons,1)
-				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
-				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
-			end do
-		end if
+		COMPLEX(kind=qp),intent(out)			:: prod_N,prod_Z
+		COMPLEX(dp),intent(out) 			:: U_N(lvls,lvls),V_N(lvls,lvls),&
+								   U_Z(lvls,lvls),V_Z(lvls,lvls)
 
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-	end function analytic_EV
-=======
-=======
-	integer, parameter :: dp=selected_real_kind(2*kind(1.0))
-contains
-=======
-	integer, parameter :: dp=selected_real_kind(2*kind(1.0))
-contains
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-	function analytic_EV(nucleons,delta,lam,NN) result(EV)
-		type(Nucleon),dimension(:), intent(in) :: nucleons
-		real(dp), intent(in) :: delta,lam
-		integer,intent(in) :: NN
-		real(dp)  :: summ
-		real(dp), dimension(size(nucleons,1),2) :: EV
-		integer :: i
+		REAL(dp) 	:: 	Theta_N(lvls),Theta_Z(lvls),&
+				 	EV_N(lvls,2),EV_Z(lvls,2),&
+					lam_sN,lam_sZ,tol
 
-		if(delta==0._dp) then
-			summ=0
-			i=1
-			do while(summ<NN)
-				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
-				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
+		integer 	:: i,j,step
 
-				summ=summ+EV(i,2)
-				i=i+1
-			end do
-			EV(i:size(nucleons,1),1)=0
-			EV(i:size(nucleons,1),2)=0
-		else
-			do i=1,size(nucleons,1)
-				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
-				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
-			end do
-		end if
+		step=100000 	! Nbr of points in \lambda vector
+		tol=0.0000001	! tolerance to find root
 
-	end function analytic_EV
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
+		call analytic_solve_sweep(nucleus,N,Z,step,tol,&
+					  EV_N,lam_sN,EV_Z,lam_sZ,del_pairing)
+
+		U_N=0 	; V_N=0 	; prod_N=1;
+		U_Z=0 	; V_Z=0 	; prod_Z=1;
+		do i=1,lvls,2
+			Theta_N(i) 	= 0.5*dacos(-1.d0+2*EV_N(i,2))
+			Theta_N(i+1) 	= 0.5*dacos(-1.d0+2*EV_N(i+1,2))
+			Theta_Z(i) 	= 0.5*dacos(-1.d0+2*EV_Z(i,2))
+			Theta_Z(i+1) 	= 0.5*dacos(-1.d0+2*EV_Z(i+1,2))
+			
+			U_N(i,i) 	= cmplx(dsin(theta_N(i)),0,8)
+			U_N(i+1,i+1) 	= cmplx(dsin(theta_N(i)),0,8)
+			U_Z(i,i) 	= cmplx(dsin(theta_Z(i)),0,8)
+			U_Z(i+1,i+1) 	= cmplx(dsin(theta_Z(i)),0,8)
+
+			if(i+1<=lvls) then
+				prod_N 		= prod_N*EV_N(i,2)
+				V_N(i,i+1) 	= cmplx(dcos(theta_N(i)),0,8)
+				V_N(i+1,i) 	= cmplx(-1*dcos(theta_N(i)),0,8)
+
+				prod_Z 		= prod_Z*EV_Z(i,2)
+				V_Z(i,i+1) 	= cmplx(dcos(theta_Z(i)),0,8)
+				V_Z(i+1,i) 	= cmplx(-1*dcos(theta_Z(i)),0,8)
+			end if
+		end do
+	END Subroutine qpart_creator
+
 		
+! Solves the BCS-model for both protons EV_Z and neutrons EV_N using lambda sweep until the energy gives the correct value of
+! <N>² = sum(EV_x(:,2))
 	subroutine analytic_solve_sweep(nucleus,N,Z,step,tol,EV_N,lam_sN,&
-			EV_Z,lam_sZ,factor)
+			EV_Z,lam_sZ,del_pairing)
 		type(Nucleon),dimension(:,:), intent(in) :: nucleus
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		integer, intent(in) 			:: N,Z,step
-		real(dp), intent(in) 			:: tol
-		real(dp), intent(in), optional 		:: factor
-=======
-<<<<<<< HEAD
 		integer, intent(in) 			 :: N,Z,step
 		real(dp), intent(in) 			 :: tol
 		real(dp), intent(in), optional 		 :: del_pairing
->>>>>>> hola
 		real(dp), dimension(:,:), intent(out) :: EV_N,EV_Z
-		real(dp), intent(out) 		:: lam_sN,lam_sZ
+		real(dp), intent(out) 			 :: lam_sN,lam_sZ
 		
 		! 	Variables used for solution	
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		real(dp) 				:: deltaR,Vsum, scal
-		real(dp), dimension(:),allocatable 	:: lam_vector,lam_vector_old
-		integer 				:: siz,i,midP
-=======
 		real(dp) 				 :: deltaR,Vsum, scal
 		real(dp), dimension(:),allocatable 	 :: lam_vector,lam_vector_old
 		integer 				 :: siz,i,midP
-=======
-		integer, intent(in) 			:: N,Z,step
-		real(dp), intent(in) 			:: tol
-		real(dp), intent(in), optional 		:: factor
-		real(dp), dimension(:,:), intent(out) :: EV_N,EV_Z
-		real(dp), intent(out) 		:: lam_sN,lam_sZ
-		
-		! 	Variables used for solution	
-		real(dp) 				:: deltaR,Vsum, scal
-		real(dp), dimension(:),allocatable 	:: lam_vector,lam_vector_old
-		integer 				:: siz,i,midP
-<<<<<<< HEAD
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 
-		if(present(factor)) then
-			scal=factor*12.d0
+		if(present(del_pairing)) then
+			deltaR=del_pairing
 		else
-			scal=12.d0
+			write(*,*) 'Empirical pairing activated'
+			deltaR=12.d0/sqrt(real(N+Z))
 		end if
 		
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		!open(unit=1,file='data/sweep_test_N.dat',status='replace')
-
-		deltaR=scal/sqrt(real(N+Z))
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		open(unit=1,file='data/sweep_test_N.dat',status='replace')
-=======
-		!open(unit=1,file='data/sweep_test_N.dat',status='replace')
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
-		!open(unit=1,file='data/sweep_test_N.dat',status='replace')
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 
-		allocate(lam_vector(step))
+		allocate(lam_vector(step),lam_vector_old(step))
 		lam_vector=linspace( lower_energy(nucleus(:,1),N),&
 			higher_energy(nucleus(:,1),N),step)
 
@@ -153,208 +87,104 @@ contains
 
 			siz = size(lam_vector,1)
 			midP=ceiling(siz/2d0)
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 			lam_sN=lam_vector(midP)
 
-=======
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
-			allocate(lam_vector_old(siz))
-			lam_vector_old=lam_vector(1:siz)
-
-			!write(1,*) 'size of lam_vector 	' , siz
-			!write(1,*) 'midp 	', midP
-
-			lam_sN=lam_vector(midP)
-
-			!write(1,*) 'lam_sN', lam_sN
-			!write(1,*) 'E_N 	', nucleus(N,1)%E
-
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-=======
-<<<<<<< HEAD
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 			EV_N = analytic_EV(nucleus(:,1),deltaR,lam_sN,N)
 			Vsum=sum(EV_N(:,2),1)
 
-			write(1,*) 'Vsum' , Vsum
-
 			if (abs(Vsum-N)<tol) then
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-				!write(1,*) 'GOLD'
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> hola
 			       	exit 
 			else if (Vsum>N) then
-				if(midP==1) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(midP-1))
-				lam_vector=lam_vector_old(1:midP-1)	       
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum>N -- first case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
+				lam_vector=linspace(lam_vector(1),&
+				lam_vector(midP),step)
+				if(lam_vector(1)==lam_vector(siz)) then
+					lam_vector=linspace(lam_vector(1)-1d0,&
+						lam_vector(midP),step)
+				end if
 			else
-				if(midP==siz) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(siz-midP))
-				lam_vector=lam_vector_old(midP+1:siz)
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum<N -- second case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
-			end if
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-			!write(1,*) 
-			!write(1,*) 'lam_vector' 
-			!write(1,*) lam_vector
-=======
-=======
-				!write(1,*) 'GOLD'
-			       	exit 
-			else if (Vsum>N) then
-				if(midP==1) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(midP-1))
-				lam_vector=lam_vector_old(1:midP-1)	       
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum>N -- first case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
-			else
-				if(midP==siz) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(siz-midP))
-				lam_vector=lam_vector_old(midP+1:siz)
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum<N -- second case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
-			end if
-			!write(1,*) 
-			!write(1,*) 'lam_vector' 
-			!write(1,*) lam_vector
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
-				!write(1,*) 'GOLD'
-			       	exit 
-			else if (Vsum>N) then
-				if(midP==1) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(midP-1))
-				lam_vector=lam_vector_old(1:midP-1)	       
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum>N -- first case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
-			else
-				if(midP==siz) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(siz-midP))
-				lam_vector=lam_vector_old(midP+1:siz)
-				deallocate(lam_vector_old)
-				!write(1,*) 'Vsum<N -- second case '
-				!write(1,*) 'size of reduced lam_vec  ',size(lam_vector,1)
-			end if
-			!write(1,*) 
-			!write(1,*) 'lam_vector' 
-			!write(1,*) lam_vector
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
-		END DO 
-		
-		if(allocated(lam_vector)) deallocate(lam_vector)
-		if(allocated(lam_vector_old)) deallocate(lam_vector_old)
-
-		allocate(lam_vector(step))
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		lam_vector=linspace( lower_energy(nucleus(:,2),Z),&
-			higher_energy(nucleus(:,2),Z),step)
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-		lam_vector=linspace( lower_energy(nucleus(:,2),z),&
-			higher_energy(nucleus(:,2),z),step)
->>>>>>> hola
-
-		do i=1,step
-			siz = size(lam_vector,1)
-			midP=ceiling(siz/2d0)
-			allocate(lam_vector_old(siz))
-			lam_vector_old=lam_vector(1:siz)
-			lam_sZ=lam_vector(midP)
-
-			EV_Z = analytic_EV(nucleus(:,2),deltaR,lam_sZ,Z)
-			Vsum=sum(EV_Z(:,2),1)
-
-			if (abs(Vsum-Z)<tol) then
-				!write(1,*) 'GOLD'
-			       	exit 
-			else if (Vsum>Z) then
-				if(midP==1) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(midP-1))
-				lam_vector=lam_vector_old(1:midP-1)	       
-				deallocate(lam_vector_old)
-			else
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-=======
 				lam_vector=linspace(lam_vector(midP),&
 				lam_vector(size(lam_vector,1)),step)
 				if(lam_vector(1)==lam_vector(siz)) then
 					lam_vector=linspace(lam_vector(1),&
 						lam_vector(midP)+1d0,step)
 				end if
-=======
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-		lam_vector=linspace( lower_energy(nucleus(:,2),Z),&
-			higher_energy(nucleus(:,2),Z),step)
+			end if
+		END DO 
+		
+		if(allocated(lam_vector)) deallocate(lam_vector)
+		if(allocated(lam_vector_old)) deallocate(lam_vector_old)
+
+		allocate(lam_vector(step))
+		lam_vector=linspace( lower_energy(nucleus(:,2),z),&
+			higher_energy(nucleus(:,2),z),step)
 
 		do i=1,step
 			siz = size(lam_vector,1)
-			midP=ceiling(siz/2d0)
-			allocate(lam_vector_old(siz))
-			lam_vector_old=lam_vector(1:siz)
-			lam_sZ=lam_vector(midP)
+			midp=ceiling(siz/2d0)
 
-			EV_Z = analytic_EV(nucleus(:,2),deltaR,lam_sZ,Z)
-			Vsum=sum(EV_Z(:,2),1)
+			lam_sz=lam_vector(midp)
 
-			if (abs(Vsum-Z)<tol) then
-				!write(1,*) 'GOLD'
+			ev_z = analytic_ev(nucleus(:,2),deltar,lam_sz,z)
+			vsum=sum(ev_z(:,2),1)
+
+			if (abs(Vsum-N)<tol) then
 			       	exit 
-			else if (Vsum>Z) then
-				if(midP==1) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(midP-1))
-				lam_vector=lam_vector_old(1:midP-1)	       
-				deallocate(lam_vector_old)
+			else if (Vsum>N) then
+				lam_vector=linspace(lam_vector(1),&
+				lam_vector(midP),step)
+				if(lam_vector(1)==lam_vector(siz)) then
+					lam_vector=linspace(lam_vector(1)-1d0,&
+						lam_vector(midP),step)
+				end if
 			else
->>>>>>> hola
-				if(midP==siz) exit
-				deallocate(lam_vector)
-				allocate(lam_vector(siz-midP))
-				lam_vector=lam_vector_old(midP+1:siz)
-				deallocate(lam_vector_old)
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-=======
-<<<<<<< HEAD
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
+				lam_vector=linspace(lam_vector(midP),&
+				lam_vector(size(lam_vector,1)),step)
+				if(lam_vector(1)==lam_vector(siz)) then
+					lam_vector=linspace(lam_vector(1),&
+						lam_vector(midP)+1d0,step)
+				end if
 			end if
 		end do
 		!close(unit=1)
 		if(allocated(lam_vector)) deallocate(lam_vector)
 		if(allocated(lam_vector_old)) deallocate(lam_vector_old)
 	end subroutine analytic_solve_sweep
+
+!Computes the quasi-particle energy E(i,1) and occupation prob E(i,2)=v_i²
+	function analytic_EV(nucleons,delta,lam,NN) result(EV)
+		type(Nucleon),dimension(:), intent(in) :: nucleons
+		real(dp), intent(in) :: delta,lam
+		integer,intent(in) :: NN
+		real(dp)  :: summ
+		real(dp), dimension(size(nucleons,1),2) :: EV
+		integer :: i
+
+		if(delta==0._dp) then
+			!write(*,*) 'Delta 0'
+			summ=0
+			i=1
+			do while(summ<NN)
+				write(*,*) 'analytic_EV FAIL'
+				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
+				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
+
+				summ=summ+EV(i,2)
+				i=i+1
+			end do
+			EV(i:size(nucleons,1),1)=0
+			EV(i:size(nucleons,1),2)=0
+		else
+			!write(*,*) 'delta'
+			!write(*,*) delta
+			do i=1,size(nucleons,1)
+				EV(i,1)=sqrt((nucleons(i)%E-lam)**2 + delta**2)
+				EV(i,2)=0.5*(1-1*(nucleons(i)%E-lam)/EV(i,1))
+				!write(*,*) EV(i,1)
+			end do
+		end if
+
+	end function analytic_EV
 
 	function linspace(st,en,points) result(vector)
 		real(dp), intent(in) 		:: st,en
@@ -376,18 +206,7 @@ contains
 		E0=nucleons(N)%E
 		R=N
 
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		do 
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		do while(R>2)
-=======
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-		do 
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 			R=R-1
 			if(nucleons(R)%E<E0) exit
 		end do
@@ -403,18 +222,7 @@ contains
 		E0=nucleons(N)%E
 		R=N
 
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		do 
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		do while(R+1<=size(nucleons,1)) 
-=======
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-		do 
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 			R=R+1
 			if(nucleons(R)%E>E0) exit
 		end do

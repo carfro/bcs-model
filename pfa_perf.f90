@@ -3,76 +3,9 @@ module BCS
 	use analytic_module
 	use pfaffian_module
 	implicit none
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-	integer, parameter :: N_tot=330
-	real(kind=qp), parameter :: ten_quad = 10.
-contains
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 	!integer, parameter :: N_tot=330
 	!real(kind=qp), parameter :: ten_quad = 10._qp
 contains
-=======
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-	integer, parameter :: N_tot=330
-	real(kind=qp), parameter :: ten_quad = 10.
-contains
->>>>>>> hola
-! Creates the quasiparticle U,V matrices for neutrons (_N) and protons (_Z) using analytical
-! solutions from the analytic_module, also calculates the \prod_1^N/2 v_i^2
-	Subroutine qpart_creator(nucleus,N,Z,scalefactor,U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
-
-		type(Nucleon), dimension(:,:),intent(in) 	:: nucleus
-		real(dp),intent(in)				:: scaleFactor
-		integer,intent(in) 				:: N,Z
-
-		complex(kind=qp),intent(out)			:: prod_N,prod_Z
-		complex(dp),intent(out) 				:: U_N(N_tot,N_tot),V_N(N_tot,N_tot),&
-										U_Z(N_tot,N_tot),V_Z(N_tot,N_tot)
-
-		real(dp) 	:: Theta_N(N_tot),Theta_Z(N_tot),&
-					lam_sN,lam_sZ,tol,EV_N(N_tot,2),EV_Z(N_tot,2)
-
-		integer 	:: i,j,step
-
-		step=1000 	! Nbr of points in \lambda vector
-		tol=0.001	! tolerance to find root
-
-		call analytic_solve_sweep(nucleus,N,Z,step,tol,&
-			EV_N,lam_sN,EV_Z,lam_sZ,scaleFactor)
-
-		U_N=0;V_N=0;prod_N=1;
-		U_Z=0;V_Z=0;prod_Z=1;
-		do i=1,N_tot,2
-			Theta_N(i)= 0.5*dacos(-1.d0+2*EV_N(i,2))
-			Theta_N(i+1)= 0.5*dacos(-1.d0+2*EV_N(i+1,2))
-			Theta_Z(i)= 0.5*dacos(-1.d0+2*EV_Z(i,2))
-			Theta_Z(i+1)= 0.5*dacos(-1.d0+2*EV_Z(i+1,2))
-			
-			U_N(i,i)=cmplx(dsin(theta_N(i)),0,8)
-			U_N(i+1,i+1)=cmplx(dsin(theta_N(i)),0,8)
-			U_Z(i,i)=cmplx(dsin(theta_Z(i)),0,8)
-			U_Z(i+1,i+1)=cmplx(dsin(theta_Z(i)),0,8)
-			if(i+1<=N_tot) then
-				prod_N=prod_N*EV_N(i,2)
-				V_N(i,i+1)=cmplx(dcos(theta_N(i)),0,8)
-				V_N(i+1,i)=cmplx(-1*dcos(theta_N(i)),0,8)
-
-				prod_Z=prod_Z*EV_Z(i,2)
-				V_Z(i,i+1)=cmplx(dcos(theta_Z(i)),0,8)
-				V_Z(i+1,i)=cmplx(-1*dcos(theta_Z(i)),0,8)
-			end if
-		end do
-	END Subroutine qpart_creator
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-=======
-<<<<<<< HEAD
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 
 	FUNCTION prod_calc(V,N) result(prod)
 		complex(dp)	:: V(N,N) 
@@ -137,27 +70,9 @@ program main
 !-------Analytical solution using BCS-equations
 	allocate(nucleus(N_tot,2))
 
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-	call nucleus_creator(N,Z,nucleus)
-
-	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 	call nucleus_creator(N,Z,N_tot,nucleus)
 
 	call qpart_creator(nucleus,N,Z,N_tot,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
-=======
-	call nucleus_creator(N,Z,nucleus)
-
-	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
-	call nucleus_creator(N,Z,nucleus)
-
-	call qpart_creator(nucleus,N,Z,scalefactor(3),U_N,V_N,prod_N,U_Z,V_Z,prod_Z)
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 	
 !-------Test-loop for the pfaffians below	
 
@@ -187,19 +102,7 @@ program main
 
 		factor=1
 		call cpu_time(t1)
-<<<<<<< a5b45b79a23fa41c758a09aecee35dee3131b3e9
-		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		Pf=overlap_pfaffian(N_mult,N_mult,&
-=======
-		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
-=======
-		Pf=overlap_pfaffian(factor,N_mult,N_mult,&
->>>>>>> 0e9e817d846c3b1c1b34c99b7c9d5b690038758f
->>>>>>> hola
 			N_mult,U_test,U_test,V_test,V_test)
 		call cpu_time(t2)
 		call ZSKPF10_F95(WW_N,Pf2P) 
