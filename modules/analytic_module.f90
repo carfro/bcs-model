@@ -76,14 +76,14 @@ contains
 			deltaR=12.d0/sqrt(real(N+Z))
 		end if
 		
-		open(unit=1,file='data/sweep_test_N.dat',status='replace')
+		!open(unit=1,file='data/sweep_test_N.dat',status='replace')
 
 		allocate(lam_vector(step),lam_vector_old(step))
 		lam_vector=linspace( lower_energy(nucleus(:,1),N),&
 			higher_energy(nucleus(:,1),N),step)
 
 		DO i=1,step
-			write(1,*) i
+			!write(1,*) i
 
 			siz = size(lam_vector,1)
 			midP=ceiling(siz/2d0)
